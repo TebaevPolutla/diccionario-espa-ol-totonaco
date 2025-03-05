@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// ✅ Configuración de Firebase (usa tus credenciales reales aquí)
+// ✅ Configuración de Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
     authDomain: "diccionario-totonaco.firebaseapp.com",
@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ✅ Función para obtener las palabras de Firestore
+// ✅ Función para obtener palabras de Firestore
 async function obtenerPalabras() {
     try {
         const querySnapshot = await getDocs(collection(db, "palabras"));
@@ -24,10 +24,10 @@ async function obtenerPalabras() {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            
-            // ✅ Verificamos si los datos existen y asignamos "Sin dato" solo si están vacíos
-            const espanol = data.espanol ? data.espanol : "⚠️ Sin dato";
-            const totonaco = data.totonaco ? data.totonaco : "⚠️ Sin dato";
+
+            // 🔥 Corregido para tu estructura de datos
+            const espanol = data.espanol || "⚠️ Sin dato";
+            const totonaco = data.totonaco || "⚠️ Sin dato";
 
             palabras.push({ espanol, totonaco });
         });
@@ -44,10 +44,10 @@ async function obtenerPalabras() {
     }
 }
 
-// ✅ Función para mostrar las palabras en la página
+// ✅ Función para mostrar palabras en la página
 function mostrarPalabras(palabras) {
     const lista = document.getElementById("lista-palabras");
-    lista.innerHTML = "";  // Limpiar lista antes de mostrar
+    lista.innerHTML = ""; // Limpiar la lista antes de mostrar
 
     if (palabras.length === 0) {
         lista.innerHTML = "<li>⚠️ No hay palabras en la base de datos.</li>";
