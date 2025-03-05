@@ -1,63 +1,54 @@
-// Importar Firebase
+// ✅ Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// Configuración de Firebase (Usa tus valores correctos)
+// ✅ Configuración de Firebase (usa tus credenciales reales aquí)
 const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_PROYECTO.firebaseapp.com",
+    apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
+    authDomain: "diccionario-totonaco.firebaseapp.com",
     projectId: "diccionario-totonaco",
-    storageBucket: "TU_PROYECTO.appspot.com",
-    messagingSenderId: "TU_ID",
-    appId: "TU_APP_ID"
+    storageBucket: "diccionario-totonaco.appspot.com",
+    messagingSenderId: "134554353684",
+    appId: "1:134554353684:web:1aac000b678f98ad1de701"
 };
 
-// Inicializar Firebase
+// ✅ Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Elementos del DOM
-const buscador = document.getElementById('buscador');
-const resultado = document.getElementById('resultado');
-
-// Obtener palabras desde Firestore
+// ✅ Función para obtener las palabras de Firestore
 async function obtenerPalabras() {
-    const palabrasRef = collection(db, "palabras");
-    const snapshot = await getDocs(palabrasRef);
-    let palabras = [];
+    try {
+        const querySnapshot = await getDocs(collection(db, "palabras"));
+        const palabras = [];
 
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-
-        // 🔥 Corregido: Extraer valores desde "fields" correctamente
-        const espanol = data.espanol?.stringValue || "Sin dato";
-        const totonaco = data.totonaco?.stringValue || "Sin dato";
-
-        palabras.push({ espanol, totonaco });
-    });
-
-    console.log("✅ Palabras obtenidas correctamente:", palabras);
-
-    // Evento para buscar palabras
-    buscador.addEventListener('input', () => {
-        const query = buscador.value.toLowerCase();
-        resultado.innerHTML = '';
-
-        palabras.forEach(palabra => {
-            if (palabra.espanol.toLowerCase().includes(query) || palabra.totonaco.toLowerCase().includes(query)) {
-                const item = document.createElement('li');
-                item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
-                resultado.appendChild(item);
-            }
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            palabras.push({
+                espanol: data.espanol,
+                totonaco: data.totonaco
+            });
         });
 
-        if (resultado.innerHTML === '') {
-            const noResult = document.createElement('li');
-            noResult.textContent = 'No se encontraron resultados';
-            resultado.appendChild(noResult);
-        }
+        console.log("✅ Palabras obtenidas:", palabras);
+        mostrarPalabras(palabras); // Llamamos a la función para mostrarlas en la página
+    } catch (error) {
+        console.error("❌ Error al obtener los datos:", error);
+    }
+}
+
+// ✅ Función para mostrar las palabras en la página
+function mostrarPalabras(palabras) {
+    const lista = document.getElementById("lista-palabras");
+    lista.innerHTML = "";  // Limpiar lista antes de mostrar
+
+    palabras.forEach(palabra => {
+        const elemento = document.createElement("li");
+        elemento.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+        lista.appendChild(elemento);
     });
 }
 
-// Llamar a la función para obtener las palabras al cargar la página
-obtenerPalabras();
+// ✅ Ejecutar la función al cargar la página
+document.addEventListener("DOMContentLoaded", obtenerPalabras);
+
