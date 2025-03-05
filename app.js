@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// Configuración de Firebase (Reemplaza con tus datos reales)
+// Configuración de Firebase (Usa tus valores correctos)
 const firebaseConfig = {
     apiKey: "TU_API_KEY",
     authDomain: "TU_PROYECTO.firebaseapp.com",
@@ -29,12 +29,11 @@ async function obtenerPalabras() {
     snapshot.forEach((doc) => {
         const data = doc.data();
 
-        if (data && data.espanol && data.totonaco) {
-            palabras.push({
-                espanol: data.espanol,
-                totonaco: data.totonaco
-            });
-        }
+        // 🔥 Corregido: Extraer valores desde "fields" correctamente
+        const espanol = data.espanol?.stringValue || "Sin dato";
+        const totonaco = data.totonaco?.stringValue || "Sin dato";
+
+        palabras.push({ espanol, totonaco });
     });
 
     console.log("✅ Palabras obtenidas correctamente:", palabras);
@@ -62,4 +61,3 @@ async function obtenerPalabras() {
 
 // Llamar a la función para obtener las palabras al cargar la página
 obtenerPalabras();
-
