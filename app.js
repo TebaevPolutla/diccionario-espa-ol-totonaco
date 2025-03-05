@@ -1,8 +1,8 @@
 // 📌 Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// 📌 Configuración de Firebase (REEMPLAZA con tus datos reales)
+// 📌 Configuración de Firebase (Reemplaza con tus datos reales)
 const firebaseConfig = {
     apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
     authDomain: "diccionario-totonaco.firebaseapp.com",
@@ -16,26 +16,60 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 📌 Función para cargar el JSON y subirlo a Firebase
-async function cargarJSON() {
+// 📌 Elementos del DOM
+const buscador = document.getElementById('buscador');
+const resultado = document.getElementById('resultado');
+
+// 📌 Función para obtener palabras desde Firestore
+async function obtenerPalabras() {
     try {
-        const response = await fetch("palabras.json");  // 📌 Cargar el archivo JSON
-        const palabras = await response.json();  // 📌 Convertir a objeto JavaScript
+        const palabrasRef = collection(db, "palabras");
+        const snapshot = await getDocs(palabrasRef);
+        let palabras = [];
 
-        console.log("🚀 JSON cargado correctamente:", palabras);
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            palabras.push({
+                espanol: data.espanol.stringValue,  // 🔹 Accediendo a los datos correctamente
+                totonaco: data.totonaco.stringValue
+            });
+        });
 
-        // 📌 Subir cada palabra a Firestore
-        for (let palabra of palabras) {
-            await addDoc(collection(db, "palabras"), palabra);
-            console.log(`✅ Subida: ${palabra.espanol} - ${palabra.totonaco}`);
-        }
+        console.log("✅ Palabras obtenidas:", palabras);
 
-        console.log("🎉 ¡Todas las palabras fueron subidas a Firebase correctamente!");
+        // 📌 Mostrar todas las palabras al cargar la página
+        resultado.innerHTML = "";
+        palabras.forEach(palabra => {
+            const item = document.createElement("li");
+            item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+            resultado.appendChild(item);
+        });
+
+        // 📌 Evento para buscar palabras en tiempo real
+        buscador.addEventListener("input", () => {
+            const query = buscador.value.toLowerCase();
+            resultado.innerHTML = "";
+
+            palabras.forEach(palabra => {
+                if (palabra.espanol.toLowerCase().includes(query) || palabra.totonaco.toLowerCase().includes(query)) {
+                    const item = document.createElement("li");
+                    item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+                    resultado.appendChild(item);
+                }
+            });
+
+            if (resultado.innerHTML === "") {
+                const noResult = document.createElement("li");
+                noResult.textContent = "No se encontraron resultados";
+                resultado.appendChild(noResult);
+            }
+        });
+
     } catch (error) {
-        console.error("❌ Error al cargar JSON:", error);
+        console.error("❌ Error al obtener palabras:", error);
     }
 }
 
-// 📌 Ejecutar la función cuando la página cargue
-document.addEventListener("DOMContentLoaded", cargarJSON);
+// 📌 Llamar la función para obtener palabras al cargar la página
+document.addEventListener("DOMContentLoaded", obtenerPalabras);
 
