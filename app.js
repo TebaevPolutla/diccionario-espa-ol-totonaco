@@ -24,13 +24,20 @@ async function obtenerPalabras() {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            palabras.push({
-                espanol: data.espanol,
-                totonaco: data.totonaco
-            });
+            
+            // ✅ Verificamos si los datos existen y asignamos "Sin dato" solo si están vacíos
+            const espanol = data.espanol ? data.espanol : "⚠️ Sin dato";
+            const totonaco = data.totonaco ? data.totonaco : "⚠️ Sin dato";
+
+            palabras.push({ espanol, totonaco });
         });
 
         console.log("✅ Palabras obtenidas:", palabras);
+
+        if (palabras.length === 0) {
+            console.warn("⚠️ No se encontraron palabras en Firestore.");
+        }
+
         mostrarPalabras(palabras); // Llamamos a la función para mostrarlas en la página
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
@@ -42,6 +49,11 @@ function mostrarPalabras(palabras) {
     const lista = document.getElementById("lista-palabras");
     lista.innerHTML = "";  // Limpiar lista antes de mostrar
 
+    if (palabras.length === 0) {
+        lista.innerHTML = "<li>⚠️ No hay palabras en la base de datos.</li>";
+        return;
+    }
+
     palabras.forEach(palabra => {
         const elemento = document.createElement("li");
         elemento.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
@@ -51,4 +63,3 @@ function mostrarPalabras(palabras) {
 
 // ✅ Ejecutar la función al cargar la página
 document.addEventListener("DOMContentLoaded", obtenerPalabras);
-
