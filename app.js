@@ -28,10 +28,13 @@ async function obtenerPalabras() {
 
     snapshot.forEach((doc) => {
         const data = doc.data();
-        palabras.push({
-            espanol: data.espanol?.stringValue || "Desconocido",
-            totonaco: data.totonaco?.stringValue || "Desconocido"
-        });
+
+        if (data.fields) {
+            palabras.push({
+                espanol: data.fields.espanol?.stringValue || "Desconocido",
+                totonaco: data.fields.totonaco?.stringValue || "Desconocido"
+            });
+        }
     });
 
     console.log("✅ Palabras obtenidas:", palabras);
