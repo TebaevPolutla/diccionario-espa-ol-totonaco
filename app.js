@@ -1,3 +1,4 @@
+// 🔥 Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
@@ -15,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Elementos del DOM
+// 📌 Elementos del DOM
 const buscador = document.getElementById('buscador');
 const resultado = document.getElementById('resultado');
 
@@ -27,12 +28,12 @@ async function obtenerPalabras() {
 
     snapshot.forEach((doc) => {
         let data = doc.data();
-        if (data.espanol && data.totonaco) {
-            palabras.push({
-                espanol: data.espanol.stringValue,   // 🔥 Extraemos correctamente el stringValue
-                totonaco: data.totonaco.stringValue
-            });
-        }
+        
+        // 📌 Extraemos correctamente los valores del JSON
+        let espanol = data.espanol ? data.espanol.stringValue || data.espanol : "Desconocido";
+        let totonaco = data.totonaco ? data.totonaco.stringValue || data.totonaco : "Desconocido";
+
+        palabras.push({ espanol, totonaco });
     });
 
     console.log("✅ Palabras obtenidas:", palabras);
