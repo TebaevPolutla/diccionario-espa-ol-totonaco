@@ -1,50 +1,48 @@
-// 🔥 Importar Firebase
+// Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// 🔥 Configuración de Firebase
+// Configuración de Firebase (Reemplaza con tus datos reales)
 const firebaseConfig = {
-    apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
-    authDomain: "diccionario-totonaco.firebaseapp.com",
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROYECTO.firebaseapp.com",
     projectId: "diccionario-totonaco",
-    storageBucket: "diccionario-totonaco.appspot.com",
-    messagingSenderId: "134554353684",
-    appId: "1:134554353684:web:1aac000b678f98ad1de701"
+    storageBucket: "TU_PROYECTO.appspot.com",
+    messagingSenderId: "TU_ID",
+    appId: "TU_APP_ID"
 };
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 📌 Elementos del DOM
+// Elementos del DOM
 const buscador = document.getElementById('buscador');
 const resultado = document.getElementById('resultado');
 
-// 📌 Obtener palabras desde Firestore
+// Obtener palabras desde Firestore
 async function obtenerPalabras() {
     const palabrasRef = collection(db, "palabras");
     const snapshot = await getDocs(palabrasRef);
     let palabras = [];
 
     snapshot.forEach((doc) => {
-        let data = doc.data();
-        
-        // 📌 Extraemos correctamente los valores del JSON
-        let espanol = data.espanol ? data.espanol.stringValue || data.espanol : "Desconocido";
-        let totonaco = data.totonaco ? data.totonaco.stringValue || data.totonaco : "Desconocido";
-
-        palabras.push({ espanol, totonaco });
+        const data = doc.data();
+        palabras.push({
+            espanol: data.espanol?.stringValue || "Desconocido",
+            totonaco: data.totonaco?.stringValue || "Desconocido"
+        });
     });
 
     console.log("✅ Palabras obtenidas:", palabras);
 
-    // 📌 Evento para buscar palabras
+    // Evento para buscar palabras
     buscador.addEventListener('input', () => {
         const query = buscador.value.toLowerCase();
         resultado.innerHTML = '';
 
         palabras.forEach(palabra => {
-            if (palabra.espanol.toLowerCase().includes(query) || palabra.totonaco.toLowerCase().includes(query)) {
+            if (palabra.espanol.includes(query) || palabra.totonaco.includes(query)) {
                 const item = document.createElement('li');
                 item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
                 resultado.appendChild(item);
@@ -59,5 +57,5 @@ async function obtenerPalabras() {
     });
 }
 
-// 📌 Llamar a la función para obtener las palabras al cargar la página
+// Llamar a la función para obtener las palabras al cargar la página
 obtenerPalabras();
