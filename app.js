@@ -29,15 +29,15 @@ async function obtenerPalabras() {
     snapshot.forEach((doc) => {
         const data = doc.data();
 
-        if (data.fields) {
+        if (data && data.espanol && data.totonaco) {
             palabras.push({
-                espanol: data.fields.espanol?.stringValue || "Desconocido",
-                totonaco: data.fields.totonaco?.stringValue || "Desconocido"
+                espanol: data.espanol,
+                totonaco: data.totonaco
             });
         }
     });
 
-    console.log("✅ Palabras obtenidas:", palabras);
+    console.log("✅ Palabras obtenidas correctamente:", palabras);
 
     // Evento para buscar palabras
     buscador.addEventListener('input', () => {
@@ -45,7 +45,7 @@ async function obtenerPalabras() {
         resultado.innerHTML = '';
 
         palabras.forEach(palabra => {
-            if (palabra.espanol.includes(query) || palabra.totonaco.includes(query)) {
+            if (palabra.espanol.toLowerCase().includes(query) || palabra.totonaco.toLowerCase().includes(query)) {
                 const item = document.createElement('li');
                 item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
                 resultado.appendChild(item);
@@ -62,3 +62,4 @@ async function obtenerPalabras() {
 
 // Llamar a la función para obtener las palabras al cargar la página
 obtenerPalabras();
+
