@@ -1,87 +1,65 @@
-// Esperar a que el DOM cargue antes de ejecutar el código
-document.addEventListener("DOMContentLoaded", async function () {
-  // Importar Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+// 📌 Importar Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-  // Configuración de Firebase
-  const firebaseConfig = {
-      apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
-      authDomain: "diccionario-totonaco.firebaseapp.com",
-      projectId: "diccionario-totonaco",
-      storageBucket: "diccionario-totonaco.appspot.com",
-      messagingSenderId: "134554353684",
-      appId: "1:134554353684:web:1aac000b678f98ad1de701"
-  };
+// 📌 Configuración de Firebase (reemplaza con tus datos)
+const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROYECTO.firebaseapp.com",
+    projectId: "diccionario-totonaco",
+    storageBucket: "TU_PROYECTO.appspot.com",
+    messagingSenderId: "TU_ID",
+    appId: "TU_APP_ID"
+};
 
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+// 📌 Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  // Obtener referencias a elementos del DOM
-  const buscador = document.getElementById("buscador");
-  const resultado = document.getElementById("resultado");
+// 📌 Obtener referencias a los elementos del DOM
+const buscador = document.getElementById("buscador");
+const resultado = document.getElementById("resultado");
 
-  // 📌 Verificar si el elemento existe
-  if (!buscador || !resultado) {
-      console.error("❌ ERROR: No se encontró el elemento en el DOM.");
-      return;
-  }
+// 📌 Función para obtener palabras desde Firebase
+async function obtenerPalabras() {
+    try {
+        const querySnapshot = await getDocs(collection(db, "palabras"));
+        let palabras = [];
 
-  // 📌 Obtener palabras desde Firebase (solo una vez para optimizar)
-  let palabrasDB = [];
+        querySnapshot.forEach((doc) => {
+            palabras.push(doc.data());
+        });
 
-  async function obtenerPalabras() {
-      if (palabrasDB.length === 0) {
-          try {
-              const querySnapshot = await getDocs(collection(db, "palabras"));
-              querySnapshot.forEach((doc) => {
-                  palabrasDB.push(doc.data());
-              });
-              console.log("✅ Palabras obtenidas:", palabrasDB);
-          } catch (error) {
-              console.error("❌ Error al obtener los datos:", error);
-          }
-      }
-  }
+        return palabras;
+    } catch (error) {
+        console.error("❌ Error al obtener las palabras:", error);
+        return [];
+    }
+}
 
-  // 📌 Filtrar palabras en tiempo real sin duplicados
-  async function filtrarPalabras() {
-      await obtenerPalabras(); // Asegurar que los datos estén cargados
+// 📌 Función para mostrar solo la palabra buscada
+async function filtrarPalabras() {
+    const termino = buscador.value.toLowerCase();
+    resultado.innerHTML = ""; // Limpiar resultados anteriores
 
-      const texto = buscador.value.trim().toLowerCase();
+    if (termino === "") return; // No buscar si está vacío
 
-      // Filtrar palabras y eliminar duplicados por clave única "espanol"
-      const filtradas = palabrasDB.reduce((acumulador, palabra) => {
-          if (palabra.espanol.toLowerCase() === texto) {
-              // Si ya existe, no lo agrega nuevamente
-              if (!acumulador.some(p => p.espanol.toLowerCase() === palabra.espanol.toLowerCase())) {
-                  acumulador.push(palabra);
-              }
-          }
-          return acumulador;
-      }, []);
+    const palabras = await obtenerPalabras();
+    const filtradas = palabras.filter(palabra =>
+        palabra.espanol.toLowerCase().includes(termino)
+    );
 
-      mostrarPalabras(filtradas);
-  }
+    // 📌 Mostrar solo la palabra buscada
+    if (filtradas.length > 0) {
+        filtradas.forEach(palabra => {
+            const item = document.createElement("li");
+            item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+            resultado.appendChild(item);
+        });
+    } else {
+        resultado.innerHTML = "<li>No se encontraron resultados</li>";
+    }
+}
 
-  // 📌 Mostrar solo los resultados filtrados sin repetir
-  function mostrarPalabras(listaPalabras) {
-      resultado.innerHTML = ""; // Limpiar resultados anteriores
-
-      if (listaPalabras.length === 0) {
-          resultado.innerHTML = "<li>No se encontraron resultados</li>";
-          return;
-      }
-
-      listaPalabras.forEach((palabra) => {
-          const item = document.createElement("li");
-          item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
-          resultado.appendChild(item);
-      });
-  }
-
-  // 📌 Detectar cambios en el buscador y actualizar resultados
-  buscador.addEventListener("input", filtrarPalabras);
-});
-
+// 📌 Escuchar eventos en el input de búsqueda
+buscador.addEventListener("input", filtrarPalabras);
