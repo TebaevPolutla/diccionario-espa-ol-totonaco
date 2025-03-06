@@ -16,19 +16,31 @@ async function obtenerPalabras() {
         const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato Google Sheets
 
         let palabras = json.table.rows.map(row => ({
-            espanol: row.c[2]?.v || "Desconocido", // 📌 La columna 2 contiene el español
-            totonaco: row.c[3]?.v || "Desconocido" // 📌 La columna 3 contiene el totonaco
+            espanol: row.c[2]?.v?.trim() || "Desconocido", // 📌 La columna 2 contiene el español
+            totonaco: row.c[3]?.v?.trim() || "Desconocido" // 📌 La columna 3 contiene el totonaco
         }));
 
-        console.log("✅ Palabras obtenidas:", palabras);
-        return palabras;
+        // 📌 Eliminar duplicados
+        const palabrasUnicas = [];
+        const seen = new Set();
+
+        palabras.forEach(palabra => {
+            const key = `${palabra.espanol}-${palabra.totonaco}`; // Crear clave única
+            if (!seen.has(key)) {
+                seen.add(key);
+                palabrasUnicas.push(palabra);
+            }
+        });
+
+        console.log("✅ Palabras obtenidas (sin duplicados):", palabrasUnicas);
+        return palabrasUnicas;
     } catch (error) {
         console.error("❌ Error al obtener las palabras:", error);
         return [];
     }
 }
 
-// 📌 Función para filtrar y mostrar solo la palabra exacta buscada
+// 📌 Función para filtrar y mostrar solo la palabra exacta buscada (sin duplicados)
 async function filtrarPalabras() {
     const termino = buscador.value.trim().toLowerCase(); // Remueve espacios extra y convierte a minúsculas
     resultado.innerHTML = ""; // Limpiar resultados anteriores
@@ -42,13 +54,11 @@ async function filtrarPalabras() {
         palabra.espanol.toLowerCase() === termino
     );
 
-    // 📌 Mostrar solo la palabra exacta buscada
+    // 📌 Mostrar solo la palabra exacta buscada, asegurando que no haya duplicados
     if (filtradas.length > 0) {
-        filtradas.forEach(palabra => {
-            const item = document.createElement("li");
-            item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
-            resultado.appendChild(item);
-        });
+        const item = document.createElement("li");
+        item.textContent = `${filtradas[0].espanol} - ${filtradas[0].totonaco}`; // Solo muestra una vez
+        resultado.appendChild(item);
     } else {
         resultado.innerHTML = "<li>No se encontraron resultados</li>";
     }
