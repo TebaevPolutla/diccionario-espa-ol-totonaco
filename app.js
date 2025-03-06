@@ -1,8 +1,8 @@
-// ✅ Importar Firebase
+// Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// ✅ Configuración de Firebase
+// Configuración de Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
     authDomain: "diccionario-totonaco.firebaseapp.com",
@@ -12,54 +12,51 @@ const firebaseConfig = {
     appId: "1:134554353684:web:1aac000b678f98ad1de701"
 };
 
-// ✅ Inicializar Firebase
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ✅ Función para obtener palabras de Firestore
+// Obtener referencias a elementos del DOM
+const buscador = document.getElementById("buscador");
+const lista = document.getElementById("lista-palabras");
+
+// 📌 Obtener palabras desde Firebase
 async function obtenerPalabras() {
     try {
         const querySnapshot = await getDocs(collection(db, "palabras"));
         const palabras = [];
-
         querySnapshot.forEach((doc) => {
-            const data = doc.data();
-
-            // 🔥 Corregido para tu estructura de datos
-            const espanol = data.espanol || "⚠️ Sin dato";
-            const totonaco = data.totonaco || "⚠️ Sin dato";
-
-            palabras.push({ espanol, totonaco });
+            palabras.push(doc.data());
         });
 
         console.log("✅ Palabras obtenidas:", palabras);
-
-        if (palabras.length === 0) {
-            console.warn("⚠️ No se encontraron palabras en Firestore.");
-        }
-
-        mostrarPalabras(palabras); // Llamamos a la función para mostrarlas en la página
+        mostrarPalabras(palabras);
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
     }
 }
 
-// ✅ Función para mostrar palabras en la página
-function mostrarPalabras(palabras) {
-    const lista = document.getElementById("lista-palabras");
-    lista.innerHTML = ""; // Limpiar la lista antes de mostrar
+// 📌 Mostrar palabras en la lista
+function mostrarPalabras(listaPalabras) {
+    lista.innerHTML = ""; // Limpiar lista
 
-    if (palabras.length === 0) {
-        lista.innerHTML = "<li>⚠️ No hay palabras en la base de datos.</li>";
-        return;
-    }
-
-    palabras.forEach(palabra => {
-        const elemento = document.createElement("li");
-        elemento.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
-        lista.appendChild(elemento);
+    listaPalabras.forEach((palabra) => {
+        const item = document.createElement("li");
+        item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+        lista.appendChild(item);
     });
 }
 
-// ✅ Ejecutar la función al cargar la página
-document.addEventListener("DOMContentLoaded", obtenerPalabras);
+// 📌 Filtrar palabras en la búsqueda
+buscador.addEventListener("input", () => {
+    const texto = buscador.value.toLowerCase();
+    obtenerPalabras().then((palabras) => {
+        const filtradas = palabras.filter((palabra) =>
+            palabra.espanol.toLowerCase().includes(texto)
+        );
+        mostrarPalabras(filtradas);
+    });
+});
+
+// Ejecutar la función al cargar la página
+obtenerPalabras();

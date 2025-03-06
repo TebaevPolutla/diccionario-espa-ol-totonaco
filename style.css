@@ -1,48 +1,46 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f9;
-    padding: 20px;
+    background-color: #f4f4f4;
 }
 
 h1 {
     color: #333;
 }
 
-input[type="text"] {
-    padding: 10px;
-    width: 80%;
-    max-width: 400px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 20px;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-ul li {
-    background: #fff;
-    padding: 10px;
-    border: 1px solid #ddd;
-    margin: 5px 0;
-    border-radius: 5px;
-}
 .mensaje {
-    font-size: 18px;
+    font-size: 16px;
     color: #555;
     margin-bottom: 20px;
 }
 
 .imagen {
-    width: 100%; /* Ocupa todo el ancho disponible */
-    max-width: 600px; /* Ajusta el tamaño máximo */
-    height: auto; /* Mantiene la proporción */
-    display: block; /* Centrar la imagen */
-    margin: 0 auto 20px;
-    border-radius: 10px; /* Bordes redondeados (opcional) */
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
+#buscador {
+    padding: 10px;
+    width: 80%;
+    max-width: 400px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#lista-palabras {
+    list-style: none;
+    padding: 0;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+#lista-palabras li {
+    background: white;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
 }
