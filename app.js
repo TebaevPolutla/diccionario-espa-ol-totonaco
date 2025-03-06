@@ -37,24 +37,29 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Filtrar palabras en tiempo real
+// 📌 Filtrar palabras en tiempo real sin duplicados
 async function filtrarPalabras() {
-    await obtenerPalabras(); // Asegurarse de que los datos estén cargados
+    await obtenerPalabras(); // Asegurar que los datos estén cargados
 
     const texto = buscador.value.trim().toLowerCase();
 
-    // Filtrar por coincidencia exacta y eliminar duplicados
-    const filtradas = palabrasDB.filter((palabra, index, self) =>
-        palabra.espanol.toLowerCase() === texto &&
-        self.findIndex(p => p.espanol.toLowerCase() === palabra.espanol.toLowerCase()) === index
-    );
+    // Filtrar palabras y eliminar duplicados por clave única "espanol"
+    const filtradas = palabrasDB.reduce((acumulador, palabra) => {
+        if (palabra.espanol.toLowerCase() === texto) {
+            // Si ya existe, no lo agrega nuevamente
+            if (!acumulador.some(p => p.espanol.toLowerCase() === palabra.espanol.toLowerCase())) {
+                acumulador.push(palabra);
+            }
+        }
+        return acumulador;
+    }, []);
 
     mostrarPalabras(filtradas);
 }
 
-// 📌 Mostrar palabras filtradas sin duplicados
+// 📌 Mostrar solo los resultados filtrados sin repetir
 function mostrarPalabras(listaPalabras) {
-    resultado.innerHTML = ""; // Limpiar resultados
+    resultado.innerHTML = ""; // Limpiar resultados anteriores
 
     if (listaPalabras.length === 0) {
         resultado.innerHTML = "<li>No se encontraron resultados</li>";
