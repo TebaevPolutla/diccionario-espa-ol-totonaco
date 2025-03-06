@@ -15,9 +15,10 @@ async function obtenerPalabras() {
         const text = await response.text();
         const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato Google Sheets
 
-        let palabras = json.table.rows.map(row => ({
-            espanol: row.c[0]?.v || "Desconocido", 
-            totonaco: row.c[1]?.v || "Desconocido"
+        // 📌 Extraer correctamente las palabras desde la tercera y cuarta columna
+        let palabras = json.table.rows.slice(2).map(row => ({
+            espanol: row.c[2]?.v || "Desconocido", 
+            totonaco: row.c[3]?.v || "Desconocido"
         }));
 
         console.log("✅ Palabras obtenidas:", palabras);
