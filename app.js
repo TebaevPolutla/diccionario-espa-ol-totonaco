@@ -1,35 +1,26 @@
-// 📌 Importar Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+// 📌 ID del Google Sheets (reemplaza con el tuyo)
+const sheetID = "1-sXQZMK2sjgK5xe8kQ1fg8P10e53mS2g";
 
-// 📌 Configuración de Firebase (reemplaza con tus datos)
-const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_PROYECTO.firebaseapp.com",
-    projectId: "diccionario-totonaco",
-    storageBucket: "TU_PROYECTO.appspot.com",
-    messagingSenderId: "TU_ID",
-    appId: "TU_APP_ID"
-};
+// 📌 URL para obtener los datos en formato JSON
+const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
-// 📌 Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// 📌 Obtener referencias a los elementos del DOM
+// 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
 
-// 📌 Función para obtener palabras desde Firebase
+// 📌 Función para obtener los datos del Google Sheets
 async function obtenerPalabras() {
     try {
-        const querySnapshot = await getDocs(collection(db, "palabras"));
-        let palabras = [];
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato Google Sheets
 
-        querySnapshot.forEach((doc) => {
-            palabras.push(doc.data());
-        });
+        let palabras = json.table.rows.map(row => ({
+            espanol: row.c[0]?.v || "Desconocido", 
+            totonaco: row.c[1]?.v || "Desconocido"
+        }));
 
+        console.log("✅ Palabras obtenidas:", palabras);
         return palabras;
     } catch (error) {
         console.error("❌ Error al obtener las palabras:", error);
@@ -37,7 +28,7 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Función para mostrar solo la palabra buscada
+// 📌 Función para filtrar y mostrar solo la palabra buscada
 async function filtrarPalabras() {
     const termino = buscador.value.toLowerCase();
     resultado.innerHTML = ""; // Limpiar resultados anteriores
