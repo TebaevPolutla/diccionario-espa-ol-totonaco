@@ -13,11 +13,11 @@ async function obtenerPalabras() {
     try {
         const response = await fetch(url);
         const text = await response.text();
-        const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato Google Sheets
+        const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato de Google Sheets
 
         let palabras = json.table.rows.map(row => ({
-            espanol: row.c[2]?.v?.trim() || "Desconocido", // 📌 La columna 2 contiene el español
-            totonaco: row.c[3]?.v?.trim() || "Desconocido" // 📌 La columna 3 contiene el totonaco
+            espanol: row.c[2]?.v?.trim().toLowerCase() || "desconocido", // 📌 Columna 2 = Español
+            totonaco: row.c[3]?.v?.trim().toLowerCase() || "desconocido" // 📌 Columna 3 = Totonaco
         }));
 
         // 📌 Eliminar duplicados
@@ -25,7 +25,7 @@ async function obtenerPalabras() {
         const seen = new Set();
 
         palabras.forEach(palabra => {
-            const key = `${palabra.espanol}-${palabra.totonaco}`; // Crear clave única
+            const key = `${palabra.espanol}-${palabra.totonaco}`;
             if (!seen.has(key)) {
                 seen.add(key);
                 palabrasUnicas.push(palabra);
@@ -40,25 +40,27 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Función para filtrar y mostrar solo la palabra exacta buscada (sin duplicados)
+// 📌 Función para buscar tanto en español como en totonaco
 async function filtrarPalabras() {
-    const termino = buscador.value.trim().toLowerCase(); // Remueve espacios extra y convierte a minúsculas
+    const termino = buscador.value.trim().toLowerCase(); // Convertir entrada a minúsculas y eliminar espacios extra
     resultado.innerHTML = ""; // Limpiar resultados anteriores
 
     if (termino === "") return; // No buscar si está vacío
 
     const palabras = await obtenerPalabras();
-    
-    // 📌 Filtra solo las palabras que coinciden EXACTAMENTE con el término ingresado
+
+    // 📌 Buscar si el término aparece en español o en totonaco
     const filtradas = palabras.filter(palabra =>
-        palabra.espanol.toLowerCase() === termino
+        palabra.espanol.includes(termino) || palabra.totonaco.includes(termino)
     );
 
-    // 📌 Mostrar solo la palabra exacta buscada, asegurando que no haya duplicados
+    // 📌 Mostrar solo los resultados filtrados
     if (filtradas.length > 0) {
-        const item = document.createElement("li");
-        item.textContent = `${filtradas[0].espanol} - ${filtradas[0].totonaco}`; // Solo muestra una vez
-        resultado.appendChild(item);
+        filtradas.forEach(palabra => {
+            const item = document.createElement("li");
+            item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+            resultado.appendChild(item);
+        });
     } else {
         resultado.innerHTML = "<li>No se encontraron resultados</li>";
     }
