@@ -30,10 +30,25 @@ async function obtenerPalabras() {
         });
 
         console.log("✅ Palabras obtenidas:", palabras);
-        mostrarPalabras(palabras);
+        return palabras;  // Retorna la lista completa de palabras
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
+        return [];
     }
+}
+
+// 📌 Filtrar y mostrar palabras en tiempo real
+async function filtrarPalabras() {
+    const texto = buscador.value.toLowerCase();
+    const palabras = await obtenerPalabras();
+
+    // Filtrar palabras que coincidan con la búsqueda
+    const filtradas = palabras.filter(palabra =>
+        palabra.espanol.toLowerCase().includes(texto)
+    );
+
+    // Mostrar solo las palabras filtradas
+    mostrarPalabras(filtradas);
 }
 
 // 📌 Mostrar palabras en la lista
@@ -47,16 +62,5 @@ function mostrarPalabras(listaPalabras) {
     });
 }
 
-// 📌 Filtrar palabras en la búsqueda
-buscador.addEventListener("input", () => {
-    const texto = buscador.value.toLowerCase();
-    obtenerPalabras().then((palabras) => {
-        const filtradas = palabras.filter((palabra) =>
-            palabra.espanol.toLowerCase().includes(texto)
-        );
-        mostrarPalabras(filtradas);
-    });
-});
-
-// Ejecutar la función al cargar la página
-obtenerPalabras();
+// 📌 Detectar cambios en el buscador y actualizar resultados
+buscador.addEventListener("input", filtrarPalabras);
