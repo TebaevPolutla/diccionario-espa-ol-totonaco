@@ -15,11 +15,13 @@ async function obtenerPalabras() {
         const text = await response.text();
         const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato de Google Sheets
 
-        let palabras = json.table.rows.map(row => {
-            const espanol = row.c[2]?.v?.trim().toLowerCase() || "";
-            const totonaco = row.c[3]?.v?.trim().toLowerCase() || "";
-            return { espanol, totonaco };
-        });
+        let palabras = json.table.rows
+            .map(row => {
+                const espanol = row.c[2]?.v?.trim().toLowerCase() || "";
+                const totonaco = row.c[3]?.v?.trim().toLowerCase() || "";
+                return { espanol, totonaco };
+            })
+            .filter(p => p.espanol !== "" && p.totonaco !== ""); // Eliminar vacíos
 
         console.log("✅ Palabras obtenidas:", palabras);
         return palabras;
@@ -29,7 +31,7 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Función para buscar en español o totonaco con coincidencia exacta
+// 📌 Función para buscar SOLO coincidencias exactas en español o totonaco
 async function filtrarPalabras() {
     const termino = buscador.value.trim().toLowerCase(); // Convertir a minúsculas
     resultado.innerHTML = ""; // Limpiar resultados anteriores
@@ -38,7 +40,7 @@ async function filtrarPalabras() {
 
     const palabras = await obtenerPalabras();
 
-    // 📌 Buscar coincidencias exactas en español o totonaco
+    // 📌 Filtrar solo palabras que coincidan exactamente
     const filtradas = palabras.filter(palabra =>
         palabra.espanol === termino || palabra.totonaco === termino
     );
