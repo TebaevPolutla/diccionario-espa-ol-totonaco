@@ -18,11 +18,10 @@ async function obtenerPalabras() {
         let palabras = json.table.rows.map(row => {
             const espanol = row.c[2]?.v?.trim().toLowerCase() || "";
             const totonaco = row.c[3]?.v?.trim().toLowerCase() || "";
-
             return { espanol, totonaco };
         });
 
-        console.log("✅ Palabras obtenidas:", palabras); // Verificar en consola
+        console.log("✅ Palabras obtenidas:", palabras);
         return palabras;
     } catch (error) {
         console.error("❌ Error al obtener las palabras:", error);
@@ -30,7 +29,7 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Función para buscar en español o totonaco
+// 📌 Función para buscar en español o totonaco con coincidencia exacta
 async function filtrarPalabras() {
     const termino = buscador.value.trim().toLowerCase(); // Convertir a minúsculas
     resultado.innerHTML = ""; // Limpiar resultados anteriores
@@ -39,9 +38,9 @@ async function filtrarPalabras() {
 
     const palabras = await obtenerPalabras();
 
-    // 📌 Filtrar palabras que coincidan en español o totonaco
+    // 📌 Buscar coincidencias exactas en español o totonaco
     const filtradas = palabras.filter(palabra =>
-        palabra.espanol.includes(termino) || palabra.totonaco.includes(termino)
+        palabra.espanol === termino || palabra.totonaco === termino
     );
 
     // 📌 Mostrar solo las palabras encontradas
