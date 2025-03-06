@@ -20,38 +20,39 @@ const db = getFirestore(app);
 const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
 
-// 📌 Obtener palabras desde Firebase
-async function obtenerPalabras() {
-    try {
-        const querySnapshot = await getDocs(collection(db, "palabras"));
-        const palabras = [];
-        querySnapshot.forEach((doc) => {
-            palabras.push(doc.data());
-        });
+// 📌 Obtener palabras desde Firebase (solo una vez para optimizar)
+let palabrasDB = [];
 
-        console.log("✅ Palabras obtenidas:", palabras);
-        return palabras;
-    } catch (error) {
-        console.error("❌ Error al obtener los datos:", error);
-        return [];
+async function obtenerPalabras() {
+    if (palabrasDB.length === 0) {
+        try {
+            const querySnapshot = await getDocs(collection(db, "palabras"));
+            querySnapshot.forEach((doc) => {
+                palabrasDB.push(doc.data());
+            });
+            console.log("✅ Palabras obtenidas:", palabrasDB);
+        } catch (error) {
+            console.error("❌ Error al obtener los datos:", error);
+        }
     }
 }
 
 // 📌 Filtrar palabras en tiempo real
 async function filtrarPalabras() {
-    const texto = buscador.value.trim().toLowerCase();
-    const palabras = await obtenerPalabras();
+    await obtenerPalabras(); // Asegurarse de que los datos estén cargados
 
-    // Filtrar por coincidencia exacta
-    const filtradas = palabras.filter(palabra => 
-        palabra.espanol.toLowerCase() === texto
+    const texto = buscador.value.trim().toLowerCase();
+
+    // Filtrar por coincidencia exacta y eliminar duplicados
+    const filtradas = palabrasDB.filter((palabra, index, self) =>
+        palabra.espanol.toLowerCase() === texto &&
+        self.findIndex(p => p.espanol.toLowerCase() === palabra.espanol.toLowerCase()) === index
     );
 
-    // Mostrar los resultados filtrados
     mostrarPalabras(filtradas);
 }
 
-// 📌 Mostrar palabras filtradas
+// 📌 Mostrar palabras filtradas sin duplicados
 function mostrarPalabras(listaPalabras) {
     resultado.innerHTML = ""; // Limpiar resultados
 
