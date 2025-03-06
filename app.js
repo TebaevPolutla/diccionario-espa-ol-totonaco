@@ -1,24 +1,23 @@
-// 📌 ID de tu Google Sheets
+// 📌 ID del Google Sheets (reemplaza con el tuyo)
 const sheetID = "1-sXQZMK2sjgK5xe8kQ1fg8P10e53mS2g";
 
-// 📌 URL de la API de Google Sheets
+// 📌 URL para obtener los datos en formato JSON
 const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
 
-// 📌 Función para obtener los datos desde Google Sheets
+// 📌 Función para obtener los datos del Google Sheets
 async function obtenerPalabras() {
     try {
         const response = await fetch(url);
         const text = await response.text();
-        const json = JSON.parse(text.substring(47, text.length - 2)); // Limpieza del JSON de Google Sheets
+        const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato Google Sheets
 
-        // Extraer las palabras desde la tabla de Google Sheets
         let palabras = json.table.rows.map(row => ({
-            espanol: row.c[2]?.v || "Desconocido",  // Columna C (según el JSON)
-            totonaco: row.c[3]?.v || "Desconocido"  // Columna D (según el JSON)
+            espanol: row.c[2]?.v || "Desconocido", // 📌 La columna 2 contiene el español
+            totonaco: row.c[3]?.v || "Desconocido" // 📌 La columna 3 contiene el totonaco
         }));
 
         console.log("✅ Palabras obtenidas:", palabras);
@@ -29,19 +28,21 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Función para filtrar y mostrar solo la palabra buscada
+// 📌 Función para filtrar y mostrar solo la palabra exacta buscada
 async function filtrarPalabras() {
-    const termino = buscador.value.toLowerCase();
+    const termino = buscador.value.trim().toLowerCase(); // Remueve espacios extra y convierte a minúsculas
     resultado.innerHTML = ""; // Limpiar resultados anteriores
 
     if (termino === "") return; // No buscar si está vacío
 
     const palabras = await obtenerPalabras();
+    
+    // 📌 Filtra solo las palabras que coinciden EXACTAMENTE con el término ingresado
     const filtradas = palabras.filter(palabra =>
-        palabra.espanol.toLowerCase().includes(termino)
+        palabra.espanol.toLowerCase() === termino
     );
 
-    // 📌 Mostrar solo la palabra buscada
+    // 📌 Mostrar solo la palabra exacta buscada
     if (filtradas.length > 0) {
         filtradas.forEach(palabra => {
             const item = document.createElement("li");
