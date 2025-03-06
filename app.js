@@ -18,7 +18,7 @@ const db = getFirestore(app);
 
 // Obtener referencias a elementos del DOM
 const buscador = document.getElementById("buscador");
-const lista = document.getElementById("lista-palabras");
+const resultado = document.getElementById("resultado");
 
 // 📌 Obtener palabras desde Firebase
 async function obtenerPalabras() {
@@ -30,37 +30,43 @@ async function obtenerPalabras() {
         });
 
         console.log("✅ Palabras obtenidas:", palabras);
-        return palabras;  // Retorna la lista completa de palabras
+        return palabras;
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
         return [];
     }
 }
 
-// 📌 Filtrar y mostrar palabras en tiempo real
+// 📌 Filtrar palabras en tiempo real
 async function filtrarPalabras() {
-    const texto = buscador.value.toLowerCase();
+    const texto = buscador.value.trim().toLowerCase();
     const palabras = await obtenerPalabras();
 
-    // Filtrar palabras que coincidan con la búsqueda
-    const filtradas = palabras.filter(palabra =>
-        palabra.espanol.toLowerCase().includes(texto)
+    // Filtrar por coincidencia exacta
+    const filtradas = palabras.filter(palabra => 
+        palabra.espanol.toLowerCase() === texto
     );
 
-    // Mostrar solo las palabras filtradas
+    // Mostrar los resultados filtrados
     mostrarPalabras(filtradas);
 }
 
-// 📌 Mostrar palabras en la lista
+// 📌 Mostrar palabras filtradas
 function mostrarPalabras(listaPalabras) {
-    lista.innerHTML = ""; // Limpiar lista
+    resultado.innerHTML = ""; // Limpiar resultados
+
+    if (listaPalabras.length === 0) {
+        resultado.innerHTML = "<li>No se encontraron resultados</li>";
+        return;
+    }
 
     listaPalabras.forEach((palabra) => {
         const item = document.createElement("li");
         item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
-        lista.appendChild(item);
+        resultado.appendChild(item);
     });
 }
 
 // 📌 Detectar cambios en el buscador y actualizar resultados
 buscador.addEventListener("input", filtrarPalabras);
+
