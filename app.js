@@ -1,4 +1,4 @@
-// 📌 URL del Google Sheets en formato CSV (reemplaza con tu enlace)
+// 📌 URL del Google Sheets en formato CSV
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHUYB4pxLmNetc7ScSToTrsSFQT4adVfJIDcb3BhPcPHK0wT7jd9JyWf_A8iGH4A/pub?output=csv";
 
 // 📌 Elementos del DOM
@@ -15,17 +15,15 @@ async function obtenerPalabras() {
         // 📌 Convertir CSV a array de objetos
         palabras = data
             .split("\n")  // Dividir por líneas
-            .slice(2) // Ignorar las primeras dos filas de encabezado
-            .map(line => {
-                const columns = line.split(",");
-                return {
-                    espanol: columns[2]?.trim() || "Desconocido",
-                    totonaco: columns[3]?.trim() || "Desconocido"
-                };
-            })
-            .filter(p => p.espanol !== "Desconocido" && p.totonaco !== "Desconocido"); // Filtrar datos inválidos
+            .map(line => line.split(",")) // Dividir por comas en cada línea
+            .filter(columns => columns.length >= 4) // Asegurar que tiene suficientes columnas
+            .map(columns => ({
+                espanol: columns[2]?.trim() || "Desconocido",
+                totonaco: columns[3]?.trim() || "Desconocido"
+            }))
+            .filter(p => p.espanol !== "Desconocido" && p.totonaco !== "Desconocido"); // Eliminar datos inválidos
 
-        console.log("✅ Palabras obtenidas:", palabras);
+        console.log("✅ Palabras obtenidas correctamente:", palabras);
     } catch (error) {
         console.error("❌ Error al obtener las palabras:", error);
     }
