@@ -11,17 +11,22 @@ async function obtenerPalabras() {
     try {
         const response = await fetch(csvUrl);
         const data = await response.text();
+        const filas = data.split("\n");
+
+        console.log("🔍 CSV CRUDO RECIBIDO:", filas); // Depuración: Ver CSV en consola
 
         // 📌 Convertir CSV a array de objetos
-        palabras = data
-            .split("\n")  // Dividir por líneas
-            .map(line => line.split(",")) // Dividir por comas en cada línea
-            .filter(columns => columns.length >= 4) // Asegurar que tiene suficientes columnas
-            .map(columns => ({
-                espanol: columns[2]?.trim() || "Desconocido",
-                totonaco: columns[3]?.trim() || "Desconocido"
-            }))
-            .filter(p => p.espanol !== "Desconocido" && p.totonaco !== "Desconocido"); // Eliminar datos inválidos
+        palabras = filas
+            .map(line => {
+                const columnas = line.split(",");
+                console.log("🔍 FILA PROCESADA:", columnas); // Depuración: Ver cada fila
+
+                return {
+                    espanol: columnas[2]?.trim() || "Desconocido",
+                    totonaco: columnas[3]?.trim() || "Desconocido"
+                };
+            })
+            .filter(p => p.espanol !== "Desconocido" && p.totonaco !== "Desconocido"); // Filtrar datos inválidos
 
         console.log("✅ Palabras obtenidas correctamente:", palabras);
     } catch (error) {
