@@ -1,24 +1,25 @@
-// 📌 ID del Google Sheets (reemplaza con el tuyo)
-const sheetID = "1-sXQZMK2sjgK5xe8kQ1fg8P10e53mS2g";
-
-// 📌 URL para obtener los datos en formato JSON
-const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+// 📌 URL del archivo CSV público de Google Sheets
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHUYB4pxLmNetc7ScSToTrsSFQT4adVfJIDcb3BhPcPHK0wT7jd9JyWf_A8iGH4A/pub?output=csv";
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
 
-// 📌 Función para obtener los datos del Google Sheets
+// 📌 Función para obtener y procesar los datos CSV
 async function obtenerPalabras() {
     try {
-        const response = await fetch(url);
+        const response = await fetch(csvUrl);
         const text = await response.text();
-        const json = JSON.parse(text.substring(47, text.length - 2)); // Limpiar formato Google Sheets
-
-        let palabras = json.table.rows.map(row => ({
-            espanol: (row.c[2] && row.c[2].v) ? String(row.c[2].v).trim() : "Desconocido",
-            totonaco: (row.c[3] && row.c[3].v) ? String(row.c[3].v).trim() : "Desconocido"
-        }));
+        
+        // 📌 Convertir el CSV a un array de objetos
+        const filas = text.split("\n").slice(1); // Omitir encabezado
+        let palabras = filas.map(row => {
+            const columnas = row.split(",");
+            return {
+                espanol: columnas[0]?.trim() || "Desconocido",
+                totonaco: columnas[1]?.trim() || "Desconocido"
+            };
+        });
 
         console.log("✅ Palabras obtenidas:", palabras);
         return palabras;
@@ -28,7 +29,7 @@ async function obtenerPalabras() {
     }
 }
 
-// 📌 Función para filtrar y mostrar solo la palabra buscada (Español o Totonaco)
+// 📌 Función para buscar en español o totonaco
 async function filtrarPalabras() {
     const termino = buscador.value.toLowerCase().trim();
     resultado.innerHTML = ""; // Limpiar resultados anteriores
@@ -37,7 +38,7 @@ async function filtrarPalabras() {
 
     const palabras = await obtenerPalabras();
     const filtradas = palabras.filter(palabra =>
-        palabra.espanol.toLowerCase().includes(termino) ||
+        palabra.espanol.toLowerCase().includes(termino) || 
         palabra.totonaco.toLowerCase().includes(termino)
     );
 
@@ -55,4 +56,3 @@ async function filtrarPalabras() {
 
 // 📌 Escuchar eventos en el input de búsqueda
 buscador.addEventListener("input", filtrarPalabras);
-
