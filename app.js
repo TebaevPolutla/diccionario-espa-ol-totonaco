@@ -1,8 +1,6 @@
-// 📌 URL del Web App de Google Apps Script (Actualizada para GET)
-const scriptUrl = "https://script.google.com/macros/s/AKfycbxlpoM5fcC67sYgdXRfFc-2eIelgICgvJDOAX_9LYrJgFzgsVNckrnMqfbatvbLmADk/exec";
-
-// 📌 URL del Web App de Google Apps Script (Actualizada para POST con CORS habilitado)
-const postUrl = "https://script.google.com/macros/s/AKfycbxlpoM5fcC67sYgdXRfFc-2eIelgICgvJDOAX_9LYrJgFzgsVNckrnMqfbatvbLmADk/exec";
+// 📌 URL del Web App de Google Apps Script (Actualizada para GET y POST con CORS habilitado)
+const scriptUrl = "https://script.google.com/macros/s/AKfycbwDpHBavEAJ9aHFTWSEPVx9FaqtDabaPySzhZ9JlBNklAjGkJsTjfA82m1VMFMayRNU/exec";
+const postUrl = "https://script.google.com/macros/s/AKfycbwDpHBavEAJ9aHFTWSEPVx9FaqtDabaPySzhZ9JlBNklAjGkJsTjfA82m1VMFMayRNU/exec";
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
@@ -75,3 +73,5 @@ formulario.addEventListener("submit", async function(event) {
 window.onload = obtenerPalabrasDesdeGoogleSheets;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
 
+
+       
