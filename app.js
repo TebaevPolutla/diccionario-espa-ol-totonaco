@@ -1,6 +1,6 @@
 // 📌 Importar Firebase Firestore
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // 📌 Configuración de Firebase
 const firebaseConfig = {
@@ -30,17 +30,20 @@ async function obtenerPalabrasDesdeFirestore() {
         console.log("🔍 Obteniendo datos desde Firestore...");
         const querySnapshot = await getDocs(collection(db, "palabras"));
 
-        // Filtrar duplicados con un Set
+        // Crear un mapa para evitar duplicados en base a la palabra en español
         const palabrasUnicas = new Map();
         querySnapshot.forEach(doc => {
             const palabra = doc.data();
-            const clave = palabra.espanol.toLowerCase(); // Normalizar a minúsculas
-            palabrasUnicas.set(clave, palabra);
+            const clave = palabra.espanol.toLowerCase(); // Convertir a minúsculas
+            if (!palabrasUnicas.has(clave)) {
+                palabrasUnicas.set(clave, palabra);
+            }
         });
 
+        // Guardar solo palabras únicas
         window.palabras = Array.from(palabrasUnicas.values());
 
-        console.log("✅ Palabras obtenidas:", window.palabras);
+        console.log("✅ Palabras obtenidas sin duplicados:", window.palabras);
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
     }
@@ -53,28 +56,23 @@ function filtrarPalabras() {
 
     if (termino === "") return;
 
-    // Buscar coincidencias exactas y eliminar duplicados
+    // Buscar coincidencias exactas
     const filtradas = window.palabras.filter(palabra => 
         palabra.espanol.toLowerCase() === termino || 
         palabra.totonaco.toLowerCase() === termino
     );
 
     if (filtradas.length > 0) {
-        // Usar un Set para evitar duplicados al mostrar
-        const palabrasUnicas = new Set(filtradas.map(p => JSON.stringify(p)));
-        
-        palabrasUnicas.forEach(str => {
-            const palabra = JSON.parse(str);
-            const item = document.createElement("li");
-            item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
-            resultado.appendChild(item);
-        });
+        const palabra = filtradas[0]; // Solo mostrar una coincidencia exacta
+        const item = document.createElement("li");
+        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
+        resultado.appendChild(item);
     } else {
         resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
     }
 }
 
-// 📌 Función para agregar nuevas palabras sin duplicados
+// 📌 Función para agregar nuevas palabras evitando duplicados
 formulario.addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -87,10 +85,11 @@ formulario.addEventListener("submit", async function(event) {
         return;
     }
 
-    // Evitar que se agreguen duplicados a Firestore
-    const existe = window.palabras.some(p => p.espanol.toLowerCase() === nuevoEspanol.toLowerCase());
+    // 📌 Comprobar si la palabra ya existe en la base de datos
+    const consulta = query(collection(db, "palabras"), where("espanol", "==", nuevoEspanol.toLowerCase()));
+    const resultado = await getDocs(consulta);
 
-    if (existe) {
+    if (!resultado.empty) {
         mensaje.textContent = "⚠️ La palabra ya existe en la base de datos.";
         return;
     }
@@ -117,6 +116,3 @@ formulario.addEventListener("submit", async function(event) {
 // 📌 Cargar palabras al inicio
 window.onload = obtenerPalabrasDesdeFirestore;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
-
-
-
