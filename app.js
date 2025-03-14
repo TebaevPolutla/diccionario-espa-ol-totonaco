@@ -1,181 +1,147 @@
-// 📌 Importar Firebase Firestore
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, query, where, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diccionario Español - Totonaco</title>
 
-// 📌 Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
-  authDomain: "diccionario-totonaco.firebaseapp.com",
-  projectId: "diccionario-totonaco",
-  storageBucket: "diccionario-totonaco.appspot.com",
-  messagingSenderId: "134554353684",
-  appId: "1:134554353684:web:1aac000b678f98ad1de701"
-};
+    <!-- 🔥 Agregar Firebase desde el CDN oficial -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
 
-// 📌 Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        input, button { margin: 5px; padding: 8px; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 5px; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
 
-// 📌 Elementos del DOM
-const buscador = document.getElementById("buscador");
-const resultado = document.getElementById("resultado");
-const formulario = document.getElementById("formulario");
-const mensaje = document.getElementById("mensaje");
-const listaNoRevisadas = document.getElementById("listaNoRevisadas"); // Contenedor para palabras sin revisar
+    <h1>Diccionario Español - Totonaco</h1>
 
-window.palabras = []; // Lista global de palabras aprobadas
-window.palabrasNoRevisadas = []; // Lista de palabras sin revisar
+    <!-- 📌 Campo de búsqueda -->
+    <input type="text" id="buscador" placeholder="Escribe una palabra...">
+    <ul id="resultado"></ul>
 
-// 📌 Función para obtener palabras aprobadas desde Firestore
-async function obtenerPalabrasDesdeFirestore() {
-    try {
-        console.log("🔍 Obteniendo palabras aprobadas desde Firestore...");
-        const consulta = query(collection(db, "palabras"), where("revisado", "==", true)); // Solo palabras revisadas
-        const querySnapshot = await getDocs(consulta);
+    <!-- 📌 Formulario para agregar palabras -->
+    <form id="formulario">
+        <input type="text" id="nuevoEspanol" placeholder="Palabra en Español" required>
+        <input type="text" id="nuevoTotonaco" placeholder="Palabra en Totonaco" required>
+        <button type="submit">Agregar Palabra</button>
+        <p id="mensaje"></p>
+    </form>
 
-        window.palabras = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+    <script>
+        // 📌 Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
+            authDomain: "diccionario-totonaco.firebaseapp.com",
+            projectId: "diccionario-totonaco",
+            storageBucket: "diccionario-totonaco.appspot.com",
+            messagingSenderId: "134554353684",
+            appId: "1:134554353684:web:1aac000b678f98ad1de701"
+        };
 
-        console.log("✅ Palabras aprobadas obtenidas:", window.palabras);
-    } catch (error) {
-        console.error("❌ Error al obtener los datos:", error);
-    }
-}
+        // 📌 Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-// 📌 Función para obtener palabras NO revisadas desde Firestore
-async function obtenerPalabrasNoRevisadas() {
-    try {
-        console.log("🔍 Obteniendo palabras NO revisadas...");
-        const consulta = query(collection(db, "palabras"), where("revisado", "==", false));
-        const querySnapshot = await getDocs(consulta);
+        console.log("✅ Firebase ha sido inicializado correctamente.");
 
-        window.palabrasNoRevisadas = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        // 📌 Elementos del DOM
+        const buscador = document.getElementById("buscador");
+        const resultado = document.getElementById("resultado");
+        const formulario = document.getElementById("formulario");
+        const mensaje = document.getElementById("mensaje");
 
-        console.log("⚠️ Palabras NO revisadas obtenidas:", window.palabrasNoRevisadas);
-        actualizarListaNoRevisadas();
-    } catch (error) {
-        console.error("❌ Error al obtener palabras NO revisadas:", error);
-    }
-}
+        // 📌 Obtener palabras desde Firestore
+        async function obtenerPalabrasDesdeFirestore() {
+            try {
+                console.log("🔍 Obteniendo datos desde Firestore...");
+                const querySnapshot = await db.collection("palabras").get();
 
-// 📌 Función para actualizar la lista de palabras sin revisar
-function actualizarListaNoRevisadas() {
-    listaNoRevisadas.innerHTML = "";
-    if (window.palabrasNoRevisadas.length === 0) {
-        listaNoRevisadas.innerHTML = "<p>No hay palabras pendientes de revisión.</p>";
-        return;
-    }
+                let palabras = [];
+                querySnapshot.forEach(doc => {
+                    palabras.push(doc.data());
+                });
 
-    window.palabrasNoRevisadas.forEach(palabra => {
-        const item = document.createElement("li");
-        item.innerHTML = `
-            <strong>${palabra.espanol}</strong> - ${palabra.totonaco}
-            <button onclick="aprobarPalabra('${palabra.id}')">✅ Aprobar</button>
-            <button onclick="eliminarPalabra('${palabra.id}')">❌ Eliminar</button>
-        `;
-        listaNoRevisadas.appendChild(item);
-    });
-}
+                console.log("✅ Palabras obtenidas:", palabras);
+                return palabras;
+            } catch (error) {
+                console.error("❌ Error al obtener datos:", error);
+                return [];
+            }
+        }
 
-// 📌 Función para aprobar una palabra
-async function aprobarPalabra(id) {
-    try {
-        const palabraRef = doc(db, "palabras", id);
-        await updateDoc(palabraRef, { revisado: true });
-        console.log(`✅ Palabra aprobada: ${id}`);
-        obtenerPalabrasDesdeFirestore();
-        obtenerPalabrasNoRevisadas();
-    } catch (error) {
-        console.error("❌ Error al aprobar la palabra:", error);
-    }
-}
+        // 📌 Función para buscar palabras exactas
+        async function filtrarPalabras() {
+            const termino = buscador.value.toLowerCase().trim();
+            resultado.innerHTML = "";
 
-// 📌 Función para eliminar una palabra
-async function eliminarPalabra(id) {
-    try {
-        const palabraRef = doc(db, "palabras", id);
-        await deleteDoc(palabraRef);
-        console.log(`🗑️ Palabra eliminada: ${id}`);
-        obtenerPalabrasNoRevisadas();
-    } catch (error) {
-        console.error("❌ Error al eliminar la palabra:", error);
-    }
-}
+            if (termino === "") return;
 
-// 📌 Función para buscar palabras exactas
-function filtrarPalabras() {
-    const termino = buscador.value.toLowerCase().trim();
-    resultado.innerHTML = "";
+            const palabras = await obtenerPalabrasDesdeFirestore();
+            const filtradas = palabras.filter(palabra => 
+                palabra.espanol.toLowerCase() === termino || 
+                palabra.totonaco.toLowerCase() === termino
+            );
 
-    if (termino === "") return;
+            if (filtradas.length > 0) {
+                filtradas.forEach(palabra => {
+                    const item = document.createElement("li");
+                    item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
+                    resultado.appendChild(item);
+                });
+            } else {
+                resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
+            }
+        }
 
-    const filtradas = window.palabras.filter(palabra => 
-        palabra.espanol.toLowerCase() === termino || 
-        palabra.totonaco.toLowerCase() === termino
-    );
+        // 📌 Función para agregar una nueva palabra
+        formulario.addEventListener("submit", async function(event) {
+            event.preventDefault();
 
-    if (filtradas.length > 0) {
-        const palabra = filtradas[0];
-        const item = document.createElement("li");
-        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
-        resultado.appendChild(item);
-    } else {
-        resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
-    }
-}
+            const nuevoEspanol = document.getElementById("nuevoEspanol").value.trim();
+            const nuevoTotonaco = document.getElementById("nuevoTotonaco").value.trim();
 
-// 📌 Función para agregar nuevas palabras evitando duplicados
-formulario.addEventListener("submit", async function(event) {
-    event.preventDefault();
+            if (!nuevoEspanol || !nuevoTotonaco) {
+                mensaje.textContent = "❌ Por favor, completa todos los campos.";
+                return;
+            }
 
-    const nuevoEspanol = document.getElementById("nuevoEspanol").value.trim();
-    const nuevoTotonaco = document.getElementById("nuevoTotonaco").value.trim();
-    const colaborador = document.getElementById("colaborador").value.trim() || "Anónimo";
+            try {
+                // 📌 Verificar si la palabra ya existe
+                const consulta = await db.collection("palabras").where("espanol", "==", nuevoEspanol).get();
 
-    if (!nuevoEspanol || !nuevoTotonaco) {
-        mensaje.textContent = "❌ Por favor, completa todos los campos.";
-        return;
-    }
+                if (!consulta.empty) {
+                    mensaje.textContent = "⚠️ La palabra ya existe en la base de datos.";
+                    return;
+                }
 
-    // 📌 Comprobar si la palabra ya existe en la base de datos
-    const consulta = query(collection(db, "palabras"), where("espanol", "==", nuevoEspanol.toLowerCase()));
-    const resultado = await getDocs(consulta);
+                await db.collection("palabras").add({
+                    espanol: nuevoEspanol,
+                    totonaco: nuevoTotonaco
+                });
 
-    if (!resultado.empty) {
-        mensaje.textContent = "⚠️ La palabra ya existe en la base de datos.";
-        return;
-    }
-
-    try {
-        await addDoc(collection(db, "palabras"), {
-            espanol: nuevoEspanol,
-            totonaco: nuevoTotonaco,
-            colaborador: colaborador,
-            revisado: false  // 📌 Agregar estado de revisión
+                console.log("✅ Palabra agregada correctamente.");
+                mensaje.textContent = "✅ Palabra enviada correctamente.";
+                formulario.reset();
+                
+                // 🔄 Actualizar la lista sin recargar la página
+                obtenerPalabrasDesdeFirestore();
+            } catch (error) {
+                console.error("❌ Error al enviar la palabra:", error);
+                mensaje.textContent = "❌ Error al enviar la palabra.";
+            }
         });
 
-        console.log("✅ Palabra agregada correctamente.");
-        mensaje.textContent = "✅ Palabra enviada correctamente. Aún debe ser revisada.";
-        formulario.reset();
+        // 📌 Cargar palabras al inicio
+        buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
+    </script>
 
-        // 🔄 Actualizar la lista sin recargar la página
-        obtenerPalabrasNoRevisadas();
-    } catch (error) {
-        console.error("❌ Error al enviar la palabra:", error);
-        mensaje.textContent = "❌ Error al enviar la palabra.";
-    }
-});
-
-// 📌 Cargar palabras al inicio
-window.onload = () => {
-    obtenerPalabrasDesdeFirestore();
-    obtenerPalabrasNoRevisadas();
-};
-buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
-
-          
+</body>
+</html>
+ 
+       
+    
