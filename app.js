@@ -1,7 +1,5 @@
-// 📌 URL del Web App de Google Apps Script (Actualizada para GET y POST con CORS habilitado)
-const scriptUrl = "https://script.google.com/macros/s/AKfycbwDpHBavEAJ9aHFTWSEPVx9FaqtDabaPySzhZ9JlBNklAjGkJsTjfA82m1VMFMayRNU/exec";
-const postUrl = "https://script.google.com/macros/s/AKfycbwd8vXe-TJbktzWgkOzbl4hrnusJ80Vz70BKKD2_UtB-gIs9q1A2Ivl9wdV8RWvd2Li/exec";
-
+// 📌 URL de Google Apps Script (Actualizada)
+const scriptUrl = "https://script.google.com/macros/s/AKfycbw98w8kRLIOtqgnjvU2VLDGqSfeTRjboGFYBihjeLBTneC3m3NulqgtUWdshxEZLDgF/exec";  
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
@@ -9,14 +7,16 @@ const resultado = document.getElementById("resultado");
 const formulario = document.getElementById("formulario");
 const mensaje = document.getElementById("mensaje");
 
-window.palabras = []; // Hacer la variable global para probar en consola
+window.palabras = []; // Variable global para almacenar los datos
 
-// 📌 Función para obtener datos desde Google Sheets
-async function obtenerPalabrasDesdeGoogleSheets() {
+// 📌 Obtener palabras desde Google Sheets
+async function obtenerPalabras() {
     try {
         console.log("🔍 Intentando obtener datos desde:", scriptUrl);
-        const respuesta = await fetch(scriptUrl);
+        const respuesta = await fetch(scriptUrl, { method: "GET" });
+
         if (!respuesta.ok) throw new Error(`HTTP error! Status: ${respuesta.status}`);
+
         window.palabras = await respuesta.json();
         console.log("✅ Palabras obtenidas en tiempo real:", window.palabras);
     } catch (error) {
@@ -54,15 +54,15 @@ formulario.addEventListener("submit", async function(event) {
     }
 
     try {
-        const respuesta = await fetch(postUrl, {
+        const respuesta = await fetch(scriptUrl, {
             method: "POST",
             body: JSON.stringify({ espanol: nuevoEspanol, totonaco: nuevoTotonaco, colaborador }),
             headers: { "Content-Type": "application/json" }
         });
 
-        const resultado = await respuesta.text();
+        const resultado = await respuesta.json();
         console.log("✅ Respuesta del servidor:", resultado);
-        mensaje.textContent = "✅ Palabra enviada correctamente.";
+        mensaje.textContent = resultado.message || "✅ Palabra enviada correctamente.";
         formulario.reset();
     } catch (error) {
         console.error("❌ Error al enviar la palabra:", error);
@@ -71,8 +71,8 @@ formulario.addEventListener("submit", async function(event) {
 });
 
 // 📌 Cargar datos al inicio
-window.onload = obtenerPalabrasDesdeGoogleSheets;
+window.onload = obtenerPalabras;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
 
 
-       
+    
