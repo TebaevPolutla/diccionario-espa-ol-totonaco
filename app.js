@@ -1,6 +1,6 @@
 // 📌 Importar Firebase Firestore
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // 📌 Configuración de Firebase
 const firebaseConfig = {
@@ -24,16 +24,17 @@ const mensaje = document.getElementById("mensaje");
 
 window.palabras = []; // Lista global de palabras
 
-// 📌 Función para obtener palabras desde Firestore
+// 📌 Función para obtener palabras desde Firestore (solo palabras aprobadas)
 async function obtenerPalabrasDesdeFirestore() {
     try {
         console.log("🔍 Obteniendo datos desde Firestore...");
-        const querySnapshot = await getDocs(collection(db, "palabras"));
+        const q = query(collection(db, "palabras"), where("revisado", "==", true)); // 🔹 Solo obtiene palabras revisadas
+        const querySnapshot = await getDocs(q);
 
         // Guardar todas las palabras en la variable global
         window.palabras = querySnapshot.docs.map(doc => doc.data());
 
-        console.log("✅ Palabras obtenidas:", window.palabras);
+        console.log("✅ Palabras aprobadas obtenidas:", window.palabras);
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
     }
@@ -62,7 +63,7 @@ function filtrarPalabras() {
     }
 }
 
-// 📌 Función para agregar nuevas palabras a Firebase
+// 📌 Función para agregar nuevas palabras (se marcan como `revisado: false`)
 formulario.addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -74,27 +75,17 @@ formulario.addEventListener("submit", async function(event) {
         return;
     }
 
-    // 📌 Comprobar si la palabra ya existe
-    const consulta = query(collection(db, "palabras"), where("espanol", "==", nuevoEspanol.toLowerCase()));
-    const resultado = await getDocs(consulta);
-
-    if (!resultado.empty) {
-        mensaje.textContent = "⚠️ La palabra ya existe en la base de datos.";
-        return;
-    }
-
     try {
-        await addDoc(collection(db, "palabras"), {
+        await addDoc(collection(db, "palabras"), { 
             espanol: nuevoEspanol,
             totonaco: nuevoTotonaco,
+            revisado: false, // 🔹 Se marca como no revisado automáticamente
             fecha: new Date().toISOString()
         });
 
-        console.log("✅ Palabra agregada correctamente.");
-        mensaje.textContent = "✅ Palabra enviada correctamente.";
+        console.log("✅ Palabra agregada en la sección de revisión.");
+        mensaje.textContent = "✅ Palabra enviada para revisión.";
         formulario.reset();
-
-        obtenerPalabrasDesdeFirestore(); // 🔄 Actualizar la lista en tiempo real
     } catch (error) {
         console.error("❌ Error al enviar la palabra:", error);
         mensaje.textContent = "❌ Error al enviar la palabra.";
@@ -105,5 +96,4 @@ formulario.addEventListener("submit", async function(event) {
 window.onload = obtenerPalabrasDesdeFirestore;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
 
-    
-   
+     
