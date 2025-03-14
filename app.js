@@ -1,5 +1,5 @@
-// 📌 URL del Google Sheets en formato CSV (reemplázala con tu URL real)
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHUYB4pxLmNetc7ScSToTrsSFQT4adVfJIDcb3BhPcPHK0wT7jd9JyWf_A8iGH4A/pub?output=csv";
+// 📌 URL del Google Sheets en formato CSV
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3D7ElMKKfNVp9y2QDe5D6P-Ix3LbP4Hu3KebIwgyuHTJ_HToPjAYW46mUbgsliu0nAthJeN47wjwA/pub?output=csv";
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
@@ -11,13 +11,16 @@ async function obtenerPalabrasDesdeCSV() {
     try {
         const respuesta = await fetch(csvUrl);
         const data = await respuesta.text();
+        
+        // 📌 Separar las líneas del CSV
         const filas = data.split("\n").map(line => line.split(","));
 
-        // 📌 Verificar si la primera fila contiene los títulos correctos
+        // 📌 Obtener los títulos de las columnas
         const encabezados = filas[0].map(titulo => titulo.trim().toLowerCase());
+
         console.log("📌 Encabezados detectados en CSV:", encabezados);
 
-        // 📌 Obtener las posiciones de las columnas correctas
+        // 📌 Buscar la posición exacta de "Español" y "Totonaco"
         const colEspanol = encabezados.indexOf("español");
         const colTotonaco = encabezados.indexOf("totonaco");
 
@@ -27,13 +30,14 @@ async function obtenerPalabrasDesdeCSV() {
             return;
         }
 
-        // 📌 Extraer datos basados en las posiciones de las columnas
+        // 📌 Extraer datos de las filas, omitiendo la primera fila (títulos)
         palabras = filas.slice(1).map(columna => ({
-            espanol: columna[colEspanol]?.trim() || "No disponible",
-            totonaco: columna[colTotonaco]?.trim() || "No disponible"
+            espanol: columna[colEspanol]?.trim() || "Sin dato",
+            totonaco: columna[colTotonaco]?.trim() || "Sin dato"
         }));
 
         console.log("✅ Palabras extraídas correctamente:", palabras);
+
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
     }
