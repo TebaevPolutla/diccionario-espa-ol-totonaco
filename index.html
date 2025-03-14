@@ -23,6 +23,16 @@
     <input type="text" id="buscador" placeholder="Escribe una palabra...">
     <ul id="resultado"></ul>
 
+    <!-- 📌 Formulario para agregar nuevas palabras -->
+    <h2>Agregar Nueva Palabra</h2>
+    <form id="formulario">
+        <input type="text" id="nuevoEspanol" placeholder="Palabra en Español" required>
+        <input type="text" id="nuevoTotonaco" placeholder="Traducción en Totonaco" required>
+        <input type="text" id="colaborador" placeholder="Tu Nombre (opcional)">
+        <button type="submit">Enviar</button>
+    </form>
+    <p id="mensaje"></p>
+
     <!-- 📌 Conectar el JavaScript -->
     <script src="app.js" type="module"></script>
 </body>
