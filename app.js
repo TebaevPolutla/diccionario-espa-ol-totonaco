@@ -1,10 +1,10 @@
-// 📌 URL del Web App de Google Apps Script (Actualizado)
-const scriptUrl = "https://script.google.com/macros/s/AKfycbyhA6H66McfljU2axArQYT2hjjm-Zik303CbT39d7ISZBSPQ9CHXVcygFhA4TKA2ybv/exec";
+// 📌 URL del Web App de Google Apps Script (Actualizada)
+const scriptUrl = "https://script.google.com/macros/s/AKfycbwd_SFysQ1vQXQwHy6YzeRR77WKB5E84xMDjNfvgJwXsA6gOIBNrX22z8_ADzwWt8oh/exec";
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
-let palabras = []; // Lista global de palabras
+window.palabras = []; // Hacer la variable global para probar en consola
 
 // 📌 Función para obtener los datos desde Google Sheets en tiempo real
 async function obtenerPalabrasDesdeGoogleSheets() {
@@ -14,8 +14,8 @@ async function obtenerPalabrasDesdeGoogleSheets() {
         if (!respuesta.ok) {
             throw new Error(`HTTP error! Status: ${respuesta.status}`);
         }
-        palabras = await respuesta.json();
-        console.log("✅ Palabras obtenidas en tiempo real:", palabras);
+        window.palabras = await respuesta.json(); // Almacenar datos globalmente
+        console.log("✅ Palabras obtenidas en tiempo real:", window.palabras);
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
     }
@@ -27,7 +27,7 @@ function filtrarPalabras() {
     resultado.innerHTML = ""; 
     if (termino === "") return;
 
-    const filtradas = palabras.filter(palabra => 
+    const filtradas = window.palabras.filter(palabra => 
         palabra.espanol.toLowerCase() === termino || 
         palabra.totonaco.toLowerCase() === termino
     );
@@ -54,6 +54,3 @@ buscador.addEventListener("input", () => {
     clearTimeout(timeout);
     timeout = setTimeout(() => filtrarPalabras(), 300);
 });
-
-     
-    
