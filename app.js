@@ -35,10 +35,8 @@ async function obtenerPalabrasDesdeCSV() {
 
         // 📌 Extraer datos desde la segunda fila (evita títulos)
         palabras = filas.slice(1).map(columna => ({
-            espanol: columna[colEspanol]?.trim().toLowerCase() || "Sin dato",
-            totonaco: columna[colTotonaco]?.trim().toLowerCase() || "Sin dato",
-            originalEspanol: columna[colEspanol]?.trim() || "Sin dato",
-            originalTotonaco: columna[colTotonaco]?.trim() || "Sin dato"
+            espanol: columna[colEspanol]?.trim() || "Sin dato",
+            totonaco: columna[colTotonaco]?.trim() || "Sin dato"
         }));
 
         console.log("✅ Palabras extraídas correctamente:", palabras);
@@ -56,10 +54,10 @@ function filtrarPalabras() {
     if (termino === "") return;
 
     // 📌 Filtrar solo palabras que comiencen EXACTAMENTE con el término ingresado
-    const filtradas = palabras.filter(palabra =>
-        palabra.espanol.startsWith(termino) || 
-        palabra.totonaco.startsWith(termino)
-    );
+    const filtradas = palabras.filter(palabra => {
+        return palabra.espanol.toLowerCase().startsWith(termino) || 
+               palabra.totonaco.toLowerCase().startsWith(termino);
+    });
 
     // 📌 Mostrar los resultados mejorados
     if (filtradas.length > 0) {
@@ -68,8 +66,8 @@ function filtrarPalabras() {
 
             // 📌 Resaltar la coincidencia en los resultados
             let regex = new RegExp(`^${termino}`, "gi");
-            let espanolDestacado = palabra.originalEspanol.replace(regex, match => `<mark>${match}</mark>`);
-            let totonacoDestacado = palabra.originalTotonaco.replace(regex, match => `<mark>${match}</mark>`);
+            let espanolDestacado = palabra.espanol.replace(regex, match => `<mark>${match}</mark>`);
+            let totonacoDestacado = palabra.totonaco.replace(regex, match => `<mark>${match}</mark>`);
 
             item.innerHTML = `<strong>${espanolDestacado}</strong> - ${totonacoDestacado}`;
             resultado.appendChild(item);
@@ -82,7 +80,7 @@ function filtrarPalabras() {
 // 📌 Cargar datos al inicio
 window.onload = obtenerPalabrasDesdeCSV;
 
-// 📌 Agregar búsqueda con debounce
+// 📌 Agregar búsqueda con debounce para evitar sobrecarga de búsquedas en cada tecla presionada
 let timeout;
 buscador.addEventListener("input", () => {
     clearTimeout(timeout);
