@@ -1,5 +1,5 @@
 // 📌 URL del Web App de Google Apps Script (Actualizada)
-const scriptUrl = "https://script.google.com/macros/s/AKfycbwd_SFysQ1vQXQwHy6YzeRR77WKB5E84xMDjNfvgJwXsA6gOIBNrX22z8_ADzwWt8oh/exec";
+const scriptUrl = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjKydTuO6tFIXoRLbaGkdFyW14Wpof0Ned9Dbb9mDx3TMtpeJ7S0_TEedAwxkdhSQISWkVmtHC-fPy8dEm3Hud02j-r3BYkyJlVa3d2QS3onm_9invGwaZ9H7Poky4YTK4zm3w-53koWYQG7trKrdTF6s4skzNzEet-Hgy5iIqOOeJGhtyqvdt_m0W2MMd5_hRWB88Rre63bfC0fHVLYWe9fP5wVyEixeNvmZ5HI-AiCzPdNm8AgQCk8H-3H-VuV1vjAhl9rcPF2mp0htwBdeUZ2mHxnQ&lib=MnewecsndWBLjpOhrm3CYVHKRT9d30hqB";
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
@@ -54,3 +54,5 @@ buscador.addEventListener("input", () => {
     clearTimeout(timeout);
     timeout = setTimeout(() => filtrarPalabras(), 300);
 });
+
+   
