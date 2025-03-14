@@ -6,50 +6,45 @@ const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
 let palabras = []; // Lista global de palabras
 
-// 📌 Función para obtener y procesar los datos CSV
-async function obtenerPalabras() {
+// 📌 Función para obtener y convertir CSV a JSON
+async function obtenerPalabrasDesdeCSV() {
     try {
-        const response = await fetch(csvUrl);
-        const data = await response.text();
-        const filas = data.split("\n");
+        const respuesta = await fetch(csvUrl);
+        const data = await respuesta.text();
+        const filas = data.split("\n").map(line => line.split(","));
 
-        console.log("🔍 CSV CRUDO RECIBIDO:", filas); // Depuración: Ver CSV en consola
-
-        // 📌 Convertir CSV a array de objetos
-        palabras = filas
-            .map(line => {
-                const columnas = line.split(",");
-                console.log("🔍 FILA PROCESADA:", columnas); // Depuración: Ver cada fila
-
-                return {
-                    espanol: columnas[2]?.trim() || "Desconocido",
-                    totonaco: columnas[3]?.trim() || "Desconocido"
-                };
-            })
-            .filter(p => p.espanol !== "Desconocido" && p.totonaco !== "Desconocido"); // Filtrar datos inválidos
+        // 📌 Extraer los datos y convertirlos en un objeto JSON
+        palabras = filas.slice(1).map(columna => ({
+            espanol: columna[0]?.trim() || "Desconocido",
+            totonaco: columna[1]?.trim() || "Desconocido",
+            ejemplo: columna[2]?.trim() || "Sin ejemplo",
+            fuente: columna[3]?.trim() || "Desconocido"
+        }));
 
         console.log("✅ Palabras obtenidas correctamente:", palabras);
     } catch (error) {
-        console.error("❌ Error al obtener las palabras:", error);
+        console.error("❌ Error al obtener los datos:", error);
     }
 }
 
-// 📌 Función para filtrar y mostrar resultados en español o totonaco
+// 📌 Función para buscar palabras en el diccionario
 function filtrarPalabras() {
     const termino = buscador.value.toLowerCase();
     resultado.innerHTML = ""; // Limpiar resultados anteriores
 
-    if (termino === "") return; // No buscar si está vacío
+    if (termino === "") return; // No buscar si el campo está vacío
 
     const filtradas = palabras.filter(palabra =>
-        palabra.espanol.toLowerCase().includes(termino) || palabra.totonaco.toLowerCase().includes(termino)
+        palabra.espanol.toLowerCase().includes(termino) || 
+        palabra.totonaco.toLowerCase().includes(termino)
     );
 
-    // 📌 Mostrar resultados
     if (filtradas.length > 0) {
         filtradas.forEach(palabra => {
             const item = document.createElement("li");
-            item.textContent = `${palabra.espanol} - ${palabra.totonaco}`;
+            item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco} <br> 
+                              <em>Ejemplo:</em> ${palabra.ejemplo} <br>
+                              <small>Fuente: ${palabra.fuente}</small>`;
             resultado.appendChild(item);
         });
     } else {
@@ -57,8 +52,12 @@ function filtrarPalabras() {
     }
 }
 
-// 📌 Escuchar eventos en el input de búsqueda
-buscador.addEventListener("input", filtrarPalabras);
+// 📌 Cargar datos automáticamente al abrir la web
+window.onload = obtenerPalabrasDesdeCSV;
 
-// 📌 Cargar datos al inicio
-obtenerPalabras();
+// 📌 Agregar búsqueda con debounce para mejorar rendimiento
+let timeout;
+buscador.addEventListener("input", () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => filtrarPalabras(), 300);
+});
