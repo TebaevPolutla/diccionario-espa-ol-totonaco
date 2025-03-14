@@ -6,31 +6,37 @@ const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
 let palabras = []; // Lista global de palabras
 
-// 📌 Función para obtener y convertir CSV a JSON
+// 📌 Función para obtener y procesar el CSV
 async function obtenerPalabrasDesdeCSV() {
     try {
+        console.log("🔍 Intentando obtener datos desde:", csvUrl);
         const respuesta = await fetch(csvUrl);
+        
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! Status: ${respuesta.status}`);
+        }
+
         const data = await respuesta.text();
         
-        // 📌 Separar las líneas del CSV
-        const filas = data.split("\n").map(line => line.split(","));
+        // 📌 Verificar si el CSV tiene datos
+        console.log("📌 Datos brutos recibidos del CSV:", data);
 
-        // 📌 Obtener los títulos de las columnas
-        const encabezados = filas[0].map(titulo => titulo.trim().toLowerCase());
+        // 📌 Separar líneas y buscar la fila correcta con encabezados
+        const filas = data.split("\n").map(line => line.split(","));
+        let encabezados = filas[0].map(titulo => titulo.trim().toLowerCase());
 
         console.log("📌 Encabezados detectados en CSV:", encabezados);
 
-        // 📌 Buscar la posición exacta de "Español" y "Totonaco"
+        // 📌 Buscar las posiciones de "Español" y "Totonaco"
         const colEspanol = encabezados.indexOf("español");
         const colTotonaco = encabezados.indexOf("totonaco");
 
-        // 📌 Si no encuentra las columnas, mostrar error
         if (colEspanol === -1 || colTotonaco === -1) {
             console.error("❌ Error: No se encontraron las columnas correctas en el CSV.");
             return;
         }
 
-        // 📌 Extraer datos de las filas, omitiendo la primera fila (títulos)
+        // 📌 Extraer datos desde la segunda fila (evita títulos)
         palabras = filas.slice(1).map(columna => ({
             espanol: columna[colEspanol]?.trim() || "Sin dato",
             totonaco: columna[colTotonaco]?.trim() || "Sin dato"
@@ -43,12 +49,12 @@ async function obtenerPalabrasDesdeCSV() {
     }
 }
 
-// 📌 Función para buscar palabras en el diccionario
+// 📌 Función para buscar palabras
 function filtrarPalabras() {
     const termino = buscador.value.toLowerCase();
-    resultado.innerHTML = ""; // Limpiar resultados anteriores
+    resultado.innerHTML = ""; 
 
-    if (termino === "") return; // No buscar si el campo está vacío
+    if (termino === "") return;
 
     const filtradas = palabras.filter(palabra =>
         palabra.espanol.toLowerCase().includes(termino) || 
@@ -66,12 +72,14 @@ function filtrarPalabras() {
     }
 }
 
-// 📌 Cargar datos automáticamente al abrir la web
+// 📌 Cargar datos al inicio
 window.onload = obtenerPalabrasDesdeCSV;
 
-// 📌 Agregar búsqueda con debounce para mejorar rendimiento
+// 📌 Agregar búsqueda con debounce
 let timeout;
 buscador.addEventListener("input", () => {
     clearTimeout(timeout);
     timeout = setTimeout(() => filtrarPalabras(), 300);
 });
+
+    
