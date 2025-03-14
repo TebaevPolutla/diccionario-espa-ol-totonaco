@@ -1,4 +1,4 @@
-// 📌 URL del Google Sheets en formato CSV
+// 📌 URL del Google Sheets en formato CSV (reemplázala con tu URL real)
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHUYB4pxLmNetc7ScSToTrsSFQT4adVfJIDcb3BhPcPHK0wT7jd9JyWf_A8iGH4A/pub?output=csv";
 
 // 📌 Elementos del DOM
@@ -13,17 +13,15 @@ async function obtenerPalabrasDesdeCSV() {
         const data = await respuesta.text();
         const filas = data.split("\n").map(line => line.split(","));
 
-        // 📌 Verifica si la primera fila contiene los títulos correctos
+        // 📌 Verificar si la primera fila contiene los títulos correctos
         const encabezados = filas[0].map(titulo => titulo.trim().toLowerCase());
-        console.log("📌 Encabezados encontrados en CSV:", encabezados);
+        console.log("📌 Encabezados detectados en CSV:", encabezados);
 
-        // 📌 Encuentra las posiciones de cada columna
+        // 📌 Obtener las posiciones de las columnas correctas
         const colEspanol = encabezados.indexOf("español");
         const colTotonaco = encabezados.indexOf("totonaco");
-        const colEjemplo = encabezados.indexOf("ejemplo");
-        const colFuente = encabezados.indexOf("fuente");
 
-        // 📌 Si no encuentra los encabezados, muestra un error
+        // 📌 Si no encuentra las columnas, mostrar error
         if (colEspanol === -1 || colTotonaco === -1) {
             console.error("❌ Error: No se encontraron las columnas correctas en el CSV.");
             return;
@@ -32,9 +30,7 @@ async function obtenerPalabrasDesdeCSV() {
         // 📌 Extraer datos basados en las posiciones de las columnas
         palabras = filas.slice(1).map(columna => ({
             espanol: columna[colEspanol]?.trim() || "No disponible",
-            totonaco: columna[colTotonaco]?.trim() || "No disponible",
-            ejemplo: columna[colEjemplo]?.trim() || "Sin ejemplo",
-            fuente: columna[colFuente]?.trim() || "Desconocido"
+            totonaco: columna[colTotonaco]?.trim() || "No disponible"
         }));
 
         console.log("✅ Palabras extraídas correctamente:", palabras);
@@ -58,9 +54,7 @@ function filtrarPalabras() {
     if (filtradas.length > 0) {
         filtradas.forEach(palabra => {
             const item = document.createElement("li");
-            item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco} <br> 
-                              <em>Ejemplo:</em> ${palabra.ejemplo} <br>
-                              <small>Fuente: ${palabra.fuente}</small>`;
+            item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
             resultado.appendChild(item);
         });
     } else {
