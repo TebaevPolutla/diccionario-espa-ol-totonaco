@@ -22,14 +22,23 @@ const resultado = document.getElementById("resultado");
 const formulario = document.getElementById("formulario");
 const mensaje = document.getElementById("mensaje");
 
-window.palabras = []; // Almacena palabras para búsqueda local
+window.palabras = []; // Lista global de palabras
 
-// 📌 Función para obtener palabras desde Firebase Firestore
+// 📌 Función para obtener palabras desde Firestore sin duplicados
 async function obtenerPalabrasDesdeFirestore() {
     try {
         console.log("🔍 Obteniendo datos desde Firestore...");
         const querySnapshot = await getDocs(collection(db, "palabras"));
-        window.palabras = querySnapshot.docs.map(doc => doc.data());
+
+        // Filtrar duplicados con un Set
+        const palabrasUnicas = new Map();
+        querySnapshot.forEach(doc => {
+            const palabra = doc.data();
+            const clave = palabra.espanol.toLowerCase(); // Normalizar a minúsculas
+            palabrasUnicas.set(clave, palabra);
+        });
+
+        window.palabras = Array.from(palabrasUnicas.values());
 
         console.log("✅ Palabras obtenidas:", window.palabras);
     } catch (error) {
@@ -37,23 +46,25 @@ async function obtenerPalabrasDesdeFirestore() {
     }
 }
 
-// 📌 Función para buscar palabras exactas
+// 📌 Función para buscar palabras exactas sin duplicados
 function filtrarPalabras() {
     const termino = buscador.value.toLowerCase().trim();
-    resultado.innerHTML = ""; // 🔍 Limpiar resultados antes de mostrar nuevos
+    resultado.innerHTML = "";
 
     if (termino === "") return;
 
+    // Buscar coincidencias exactas y eliminar duplicados
     const filtradas = window.palabras.filter(palabra => 
         palabra.espanol.toLowerCase() === termino || 
         palabra.totonaco.toLowerCase() === termino
     );
 
-    // 🔍 Eliminar duplicados antes de mostrarlos
-    const palabrasUnicas = Array.from(new Set(filtradas.map(p => JSON.stringify(p)))).map(str => JSON.parse(str));
-
-    if (palabrasUnicas.length > 0) {
-        palabrasUnicas.forEach(palabra => {
+    if (filtradas.length > 0) {
+        // Usar un Set para evitar duplicados al mostrar
+        const palabrasUnicas = new Set(filtradas.map(p => JSON.stringify(p)));
+        
+        palabrasUnicas.forEach(str => {
+            const palabra = JSON.parse(str);
             const item = document.createElement("li");
             item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
             resultado.appendChild(item);
@@ -63,7 +74,7 @@ function filtrarPalabras() {
     }
 }
 
-// 📌 Función para agregar nuevas palabras a Firestore
+// 📌 Función para agregar nuevas palabras sin duplicados
 formulario.addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -73,6 +84,14 @@ formulario.addEventListener("submit", async function(event) {
 
     if (!nuevoEspanol || !nuevoTotonaco) {
         mensaje.textContent = "❌ Por favor, completa todos los campos.";
+        return;
+    }
+
+    // Evitar que se agreguen duplicados a Firestore
+    const existe = window.palabras.some(p => p.espanol.toLowerCase() === nuevoEspanol.toLowerCase());
+
+    if (existe) {
+        mensaje.textContent = "⚠️ La palabra ya existe en la base de datos.";
         return;
     }
 
@@ -87,7 +106,7 @@ formulario.addEventListener("submit", async function(event) {
         mensaje.textContent = "✅ Palabra enviada correctamente.";
         formulario.reset();
 
-        // 🔄 Volver a obtener palabras para incluir la nueva en la búsqueda
+        // 🔄 Actualizar la lista sin recargar la página
         obtenerPalabrasDesdeFirestore();
     } catch (error) {
         console.error("❌ Error al enviar la palabra:", error);
@@ -99,4 +118,5 @@ formulario.addEventListener("submit", async function(event) {
 window.onload = obtenerPalabrasDesdeFirestore;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
 
-         
+
+
