@@ -1,5 +1,20 @@
-// 📌 URL de Google Apps Script (Actualizada)
-const scriptUrl = "https://script.google.com/macros/s/AKfycbw98w8kRLIOtqgnjvU2VLDGqSfeTRjboGFYBihjeLBTneC3m3NulqgtUWdshxEZLDgF/exec";  
+// 📌 Importar Firebase (Si usas módulos ES6 y npm)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+// 📌 Configuración de Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
+    authDomain: "diccionario-totonaco.firebaseapp.com",
+    projectId: "diccionario-totonaco",
+    storageBucket: "diccionario-totonaco.appspot.com",
+    messagingSenderId: "134554353684",
+    appId: "1:134554353684:web:1aac000b678f98ad1de701"
+};
+
+// 📌 Inicializar Firebase y Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
@@ -7,27 +22,24 @@ const resultado = document.getElementById("resultado");
 const formulario = document.getElementById("formulario");
 const mensaje = document.getElementById("mensaje");
 
-window.palabras = []; // Variable global para almacenar los datos
+window.palabras = []; // Guardar palabras en memoria
 
-// 📌 Obtener palabras desde Google Sheets
-async function obtenerPalabras() {
+// 📌 Función para obtener datos desde Firestore
+async function obtenerPalabrasDesdeFirestore() {
     try {
-        console.log("🔍 Intentando obtener datos desde:", scriptUrl);
-        const respuesta = await fetch(scriptUrl, { method: "GET" });
-
-        if (!respuesta.ok) throw new Error(`HTTP error! Status: ${respuesta.status}`);
-
-        window.palabras = await respuesta.json();
-        console.log("✅ Palabras obtenidas en tiempo real:", window.palabras);
+        console.log("🔍 Cargando palabras desde Firebase...");
+        const snapshot = await getDocs(collection(db, "palabras"));
+        window.palabras = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("✅ Palabras obtenidas:", window.palabras);
     } catch (error) {
-        console.error("❌ Error al obtener los datos:", error);
+        console.error("❌ Error al obtener datos:", error);
     }
 }
 
 // 📌 Función para buscar palabras exactas
 function filtrarPalabras() {
     const termino = buscador.value.toLowerCase().trim();
-    resultado.innerHTML = ""; 
+    resultado.innerHTML = "";
     if (termino === "") return;
 
     const filtradas = window.palabras.filter(palabra => 
@@ -40,7 +52,7 @@ function filtrarPalabras() {
         : "<li>No se encontró la palabra exacta</li>";
 }
 
-// 📌 Enviar palabra al diccionario
+// 📌 Función para agregar palabras al diccionario en Firebase
 formulario.addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -49,21 +61,21 @@ formulario.addEventListener("submit", async function(event) {
     const colaborador = document.getElementById("colaborador").value.trim() || "Anónimo";
 
     if (!nuevoEspanol || !nuevoTotonaco) {
-        mensaje.textContent = "❌ Por favor, completa todos los campos.";
+        mensaje.textContent = "❌ Completa todos los campos.";
         return;
     }
 
     try {
-        const respuesta = await fetch(scriptUrl, {
-            method: "POST",
-            body: JSON.stringify({ espanol: nuevoEspanol, totonaco: nuevoTotonaco, colaborador }),
-            headers: { "Content-Type": "application/json" }
+        await addDoc(collection(db, "palabras"), {
+            espanol: nuevoEspanol,
+            totonaco: nuevoTotonaco,
+            colaborador: colaborador,
+            fecha: new Date()
         });
 
-        const resultado = await respuesta.json();
-        console.log("✅ Respuesta del servidor:", resultado);
-        mensaje.textContent = resultado.message || "✅ Palabra enviada correctamente.";
+        mensaje.textContent = "✅ Palabra enviada correctamente.";
         formulario.reset();
+        obtenerPalabrasDesdeFirestore(); // Recargar datos después de agregar
     } catch (error) {
         console.error("❌ Error al enviar la palabra:", error);
         mensaje.textContent = "❌ Error al enviar la palabra.";
@@ -71,8 +83,8 @@ formulario.addEventListener("submit", async function(event) {
 });
 
 // 📌 Cargar datos al inicio
-window.onload = obtenerPalabras;
+window.onload = obtenerPalabrasDesdeFirestore;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
 
 
-    
+
