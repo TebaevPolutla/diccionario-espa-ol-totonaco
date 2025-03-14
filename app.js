@@ -46,25 +46,25 @@ async function obtenerPalabrasDesdeCSV() {
     }
 }
 
-// 📌 Función mejorada para buscar palabras (Solo las que comiencen con el término ingresado)
+// 📌 Función para buscar palabras EXACTAS
 function filtrarPalabras() {
     const termino = buscador.value.toLowerCase().trim();
     resultado.innerHTML = ""; 
 
-    if (termino === "") return;
+    if (termino === "") return; // No buscar si el campo está vacío
 
-    // 📌 Filtrar solo palabras que COMIENCEN EXACTAMENTE con el término ingresado
-    const filtradas = palabras.filter(palabra => {
-        return palabra.espanol.toLowerCase().startsWith(termino) || 
-               palabra.totonaco.toLowerCase().startsWith(termino);
-    });
+    // 📌 Filtrar solo la palabra exacta o que comience con el término buscado
+    const filtradas = palabras.filter(palabra => 
+        palabra.espanol.toLowerCase() === termino || 
+        palabra.totonaco.toLowerCase() === termino
+    );
 
-    // 📌 Mostrar los resultados mejorados
+    // 📌 Mostrar solo la palabra exacta encontrada
     if (filtradas.length > 0) {
         filtradas.forEach(palabra => {
             const item = document.createElement("li");
 
-            // 📌 Resaltar la coincidencia en los resultados
+            // 📌 Resaltar la palabra encontrada
             let regex = new RegExp(`^${termino}`, "gi");
             let espanolDestacado = palabra.espanol.replace(regex, match => `<mark>${match}</mark>`);
             let totonacoDestacado = palabra.totonaco.replace(regex, match => `<mark>${match}</mark>`);
@@ -73,14 +73,16 @@ function filtrarPalabras() {
             resultado.appendChild(item);
         });
     } else {
-        resultado.innerHTML = "<li>No se encontraron resultados exactos</li>";
+        resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
     }
 }
 
-// 📌 Cargar datos al inicio
-window.onload = obtenerPalabrasDesdeCSV;
+// 📌 Cargar datos al inicio SIN MOSTRAR NADA AUTOMÁTICAMENTE
+window.onload = async () => {
+    await obtenerPalabrasDesdeCSV();
+};
 
-// 📌 Agregar búsqueda con debounce para evitar sobrecarga de búsquedas en cada tecla presionada
+// 📌 Escuchar eventos en el input de búsqueda con debounce
 let timeout;
 buscador.addEventListener("input", () => {
     clearTimeout(timeout);
