@@ -4,36 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diccionario Español - Totonaco</title>
-    <link rel="stylesheet" href="style.css">
+
+    <!-- 🔥 Agregar Firebase desde el CDN oficial -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
 </head>
 <body>
+
     <h1>Diccionario Español - Totonaco</h1>
-
-    <!-- 📌 Mensaje de Bienvenida -->
-    <p class="mensaje">
-        Bienvenidos a nuestro diccionario interactivo, este proyecto es parte del PAEC del Telebachillerato Polutla,
-        que tiene como finalidad el rescate y promoción del idioma Totonaco.
-        Busca palabras en español y descubre su significado en totonaco.
-    </p>
-
-    <!-- 📌 Imagen representativa -->
-    <img src="TEBAPOLUTLA.JPG" alt="Imagen representativa" class="imagen">
 
     <!-- 📌 Campo de búsqueda -->
     <input type="text" id="buscador" placeholder="Escribe una palabra...">
     <ul id="resultado"></ul>
 
-    <!-- 📌 Formulario para agregar nuevas palabras -->
-    <h2>Agregar Nueva Palabra</h2>
+    <!-- 📌 Formulario para agregar palabras -->
     <form id="formulario">
         <input type="text" id="nuevoEspanol" placeholder="Palabra en Español" required>
-        <input type="text" id="nuevoTotonaco" placeholder="Traducción en Totonaco" required>
-        <input type="text" id="colaborador" placeholder="Tu Nombre (opcional)">
-        <button type="submit">Enviar</button>
+        <input type="text" id="nuevoTotonaco" placeholder="Palabra en Totonaco" required>
+        <button type="submit">Agregar Palabra</button>
+        <p id="mensaje"></p>
     </form>
-    <p id="mensaje"></p>
 
-    <!-- 📌 Conectar el JavaScript -->
-    <script src="app.js" type="module"></script>
+    <script>
+        // 📌 Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlQkozFpUossaLTHycZgywkPqz4VjJSg8",
+            authDomain: "diccionario-totonaco.firebaseapp.com",
+            projectId: "diccionario-totonaco",
+            storageBucket: "diccionario-totonaco.appspot.com",
+            messagingSenderId: "134554353684",
+            appId: "1:134554353684:web:1aac000b678f98ad1de701"
+        };
+
+        // 📌 Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        console.log("✅ Firebase ha sido inicializado correctamente.");
+
+        // 📌 Elementos del DOM
+        const buscador = document.getElementById("buscador");
+        const resultado = document.getElementById("resultado");
+        const formulario = document.getElementById("formulario");
+        const mensaje = document.getElementById("mensaje");
+
+        // 📌 Obtener palabras desde Firestore
+        async function obtenerPalabrasDesdeFirestore() {
+            try {
+                console.log("🔍 Obteniendo datos desde Firestore...");
+                const querySnapshot = await db.collection("palabras").get();
+
+                let palabras = [];
+                querySnapshot.forEach(doc => {
+                    palabras.push(doc.data());
+                });
+
+                console.log("✅ Palabras obtenidas:", palabras);
+                return palabras;
+            } catch (error) {
+                console.error("❌ Error al obtener datos:", error);
+            }
+        }
+
+        // 📌 Función para buscar palabras
+        async function filtrarPalabras() {
+            const termino = buscador.value.toLowerCase().trim();
+            resultado.innerHTML = "";
+
+            if (termino === "") return;
+
+            const palabras = await obtenerPalabrasDesdeFirestore();
+            const filtradas = palabras.filter(palabra => 
+                palabra.espanol.toLowerCase() === termino || 
+                palabra.totonaco.toLowerCase() === termino
+            );
+
+            if (filtradas.length > 0) {
+                filtradas.forEach(palabra => {
+                    const item = document.createElement("li");
+                    item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
+                    resultado.appendChild(item);
+                });
+            } else {
+                resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
+            }
+        }
+
+        // 📌 Función para agregar una nueva palabra
+        formulario.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const nuevoEspanol = document.getElementById("nuevoEspanol").value.trim();
+            const nuevoTotonaco = document.getElementById("nuevoTotonaco").value.trim();
+
+            if (!nuevoEspanol || !nuevoTotonaco) {
+                mensaje.textContent = "❌ Por favor, completa todos los campos.";
+                return;
+            }
+
+            try {
+                await db.collection("palabras").add({
+                    espanol: nuevoEspanol,
+                    totonaco: nuevoTotonaco
+                });
+
+                console.log("✅ Palabra agregada correctamente.");
+                mensaje.textContent = "✅ Palabra enviada correctamente.";
+                formulario.reset();
+            } catch (error) {
+                console.error("❌ Error al enviar la palabra:", error);
+                mensaje.textContent = "❌ Error al enviar la palabra.";
+            }
+        });
+
+        // 📌 Cargar palabras al inicio
+        buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
+    </script>
+
 </body>
 </html>
+
+   
