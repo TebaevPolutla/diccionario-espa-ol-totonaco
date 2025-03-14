@@ -35,10 +35,8 @@ async function obtenerPalabrasDesdeCSV() {
 
         // 📌 Extraer datos desde la segunda fila (evita títulos)
         palabras = filas.slice(1).map(columna => ({
-            espanol: columna[colEspanol]?.trim().toLowerCase() || "sin dato",
-            totonaco: columna[colTotonaco]?.trim().toLowerCase() || "sin dato",
-            originalEspanol: columna[colEspanol]?.trim() || "Sin dato",
-            originalTotonaco: columna[colTotonaco]?.trim() || "Sin dato"
+            espanol: columna[colEspanol]?.trim() || "Sin dato",
+            totonaco: columna[colTotonaco]?.trim() || "Sin dato"
         }));
 
         console.log("✅ Palabras extraídas correctamente:", palabras);
@@ -48,17 +46,17 @@ async function obtenerPalabrasDesdeCSV() {
     }
 }
 
-// 📌 Función mejorada para buscar palabras
+// 📌 Función mejorada para buscar palabras (Solo las que comiencen con el término ingresado)
 function filtrarPalabras() {
     const termino = buscador.value.toLowerCase().trim();
     resultado.innerHTML = ""; 
 
     if (termino === "") return;
 
-    // 📌 Filtrar solo palabras que comiencen EXACTAMENTE con el término ingresado (evitando coincidencias parciales)
+    // 📌 Filtrar solo palabras que COMIENCEN EXACTAMENTE con el término ingresado
     const filtradas = palabras.filter(palabra => {
-        return palabra.espanol.split(" ")[0] === termino || 
-               palabra.totonaco.split(" ")[0] === termino;
+        return palabra.espanol.toLowerCase().startsWith(termino) || 
+               palabra.totonaco.toLowerCase().startsWith(termino);
     });
 
     // 📌 Mostrar los resultados mejorados
@@ -67,9 +65,9 @@ function filtrarPalabras() {
             const item = document.createElement("li");
 
             // 📌 Resaltar la coincidencia en los resultados
-            let regex = new RegExp(`\\b${termino}\\b`, "gi");
-            let espanolDestacado = palabra.originalEspanol.replace(regex, match => `<mark>${match}</mark>`);
-            let totonacoDestacado = palabra.originalTotonaco.replace(regex, match => `<mark>${match}</mark>`);
+            let regex = new RegExp(`^${termino}`, "gi");
+            let espanolDestacado = palabra.espanol.replace(regex, match => `<mark>${match}</mark>`);
+            let totonacoDestacado = palabra.totonaco.replace(regex, match => `<mark>${match}</mark>`);
 
             item.innerHTML = `<strong>${espanolDestacado}</strong> - ${totonacoDestacado}`;
             resultado.appendChild(item);
