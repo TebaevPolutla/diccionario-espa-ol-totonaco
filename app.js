@@ -65,7 +65,8 @@ function filtrarPalabras() {
     if (filtradas.length > 0) {
         const palabra = filtradas[0]; // Solo mostrar una coincidencia exacta
         const item = document.createElement("li");
-        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
+        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco} <br> 
+                          <small>📌 Agregado por: ${palabra.colaborador || "Anónimo"}</small>`;
         resultado.appendChild(item);
     } else {
         resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
@@ -78,7 +79,7 @@ formulario.addEventListener("submit", async function(event) {
 
     const nuevoEspanol = document.getElementById("nuevoEspanol").value.trim();
     const nuevoTotonaco = document.getElementById("nuevoTotonaco").value.trim();
-    const colaborador = document.getElementById("colaborador").value.trim() || "Anónimo";
+    const colaborador = document.getElementById("colaborador").value.trim() || "Anónimo"; // 📌 Campo de colaborador agregado
 
     if (!nuevoEspanol || !nuevoTotonaco) {
         mensaje.textContent = "❌ Por favor, completa todos los campos.";
@@ -98,7 +99,8 @@ formulario.addEventListener("submit", async function(event) {
         await addDoc(collection(db, "palabras"), {
             espanol: nuevoEspanol,
             totonaco: nuevoTotonaco,
-            colaborador: colaborador
+            colaborador: colaborador,  // 📌 Se almacena el colaborador
+            fecha: new Date().toISOString()
         });
 
         console.log("✅ Palabra agregada correctamente.");
@@ -116,3 +118,5 @@ formulario.addEventListener("submit", async function(event) {
 // 📌 Cargar palabras al inicio
 window.onload = obtenerPalabrasDesdeFirestore;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
+
+  
