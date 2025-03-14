@@ -1,6 +1,6 @@
 // 📌 Importar Firebase Firestore
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // 📌 Configuración de Firebase
 const firebaseConfig = {
@@ -19,7 +19,6 @@ const db = getFirestore(app);
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
 const resultado = document.getElementById("resultado");
-const listaPalabras = document.getElementById("lista-palabras"); // 📌 Contenedor para todas las palabras
 const formulario = document.getElementById("formulario");
 const mensaje = document.getElementById("mensaje");
 
@@ -31,40 +30,12 @@ async function obtenerPalabrasDesdeFirestore() {
         console.log("🔍 Obteniendo datos desde Firestore...");
         const querySnapshot = await getDocs(collection(db, "palabras"));
 
-        window.palabras = querySnapshot.docs.map(doc => ({
-            id: doc.id,  // 📌 ID de Firestore para poder eliminar palabras
-            ...doc.data()
-        }));
+        // Guardar todas las palabras en la variable global
+        window.palabras = querySnapshot.docs.map(doc => doc.data());
 
         console.log("✅ Palabras obtenidas:", window.palabras);
-        mostrarTodasLasPalabras();
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
-    }
-}
-
-// 📌 Función para mostrar **todas** las palabras en la lista
-function mostrarTodasLasPalabras() {
-    listaPalabras.innerHTML = "";
-    window.palabras.forEach(palabra => {
-        const item = document.createElement("li");
-        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco} <br>
-                          <small>📌 Agregado por: ${palabra.colaborador || "Anónimo"}</small>
-                          <button onclick="eliminarPalabra('${palabra.id}')">🗑️ Eliminar</button>`;
-        listaPalabras.appendChild(item);
-    });
-}
-
-// 📌 Función para eliminar una palabra de Firestore
-async function eliminarPalabra(id) {
-    if (confirm("¿Estás seguro de que quieres eliminar esta palabra?")) {
-        try {
-            await deleteDoc(doc(db, "palabras", id));
-            console.log("✅ Palabra eliminada correctamente.");
-            obtenerPalabrasDesdeFirestore(); // 🔄 Actualizar la lista después de eliminar
-        } catch (error) {
-            console.error("❌ Error al eliminar la palabra:", error);
-        }
     }
 }
 
@@ -75,6 +46,7 @@ function filtrarPalabras() {
 
     if (termino === "") return;
 
+    // Buscar coincidencias exactas
     const filtradas = window.palabras.filter(palabra => 
         palabra.espanol.toLowerCase() === termino || 
         palabra.totonaco.toLowerCase() === termino
@@ -83,21 +55,19 @@ function filtrarPalabras() {
     if (filtradas.length > 0) {
         const palabra = filtradas[0]; // Solo mostrar una coincidencia exacta
         const item = document.createElement("li");
-        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco} <br> 
-                          <small>📌 Agregado por: ${palabra.colaborador || "Anónimo"}</small>`;
+        item.innerHTML = `<strong>${palabra.espanol}</strong> - ${palabra.totonaco}`;
         resultado.appendChild(item);
     } else {
         resultado.innerHTML = "<li>No se encontró la palabra exacta</li>";
     }
 }
 
-// 📌 Función para agregar nuevas palabras evitando duplicados
+// 📌 Función para agregar nuevas palabras a Firebase
 formulario.addEventListener("submit", async function(event) {
     event.preventDefault();
 
     const nuevoEspanol = document.getElementById("nuevoEspanol").value.trim();
     const nuevoTotonaco = document.getElementById("nuevoTotonaco").value.trim();
-    const colaborador = document.getElementById("colaborador").value.trim() || "Anónimo";
 
     if (!nuevoEspanol || !nuevoTotonaco) {
         mensaje.textContent = "❌ Por favor, completa todos los campos.";
@@ -117,7 +87,6 @@ formulario.addEventListener("submit", async function(event) {
         await addDoc(collection(db, "palabras"), {
             espanol: nuevoEspanol,
             totonaco: nuevoTotonaco,
-            colaborador: colaborador,
             fecha: new Date().toISOString()
         });
 
@@ -136,7 +105,5 @@ formulario.addEventListener("submit", async function(event) {
 window.onload = obtenerPalabrasDesdeFirestore;
 buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
 
-       
-
-
+    
    
