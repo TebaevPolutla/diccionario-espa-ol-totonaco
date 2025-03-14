@@ -1,6 +1,7 @@
 // 📌 URL del Web App de Google Apps Script (Actualizada para GET y POST con CORS habilitado)
 const scriptUrl = "https://script.google.com/macros/s/AKfycbwDpHBavEAJ9aHFTWSEPVx9FaqtDabaPySzhZ9JlBNklAjGkJsTjfA82m1VMFMayRNU/exec";
-const postUrl = "https://script.google.com/macros/s/AKfycbwDpHBavEAJ9aHFTWSEPVx9FaqtDabaPySzhZ9JlBNklAjGkJsTjfA82m1VMFMayRNU/exec";
+const postUrl = "https://script.google.com/macros/s/AKfycbwd8vXe-TJbktzWgkOzbl4hrnusJ80Vz70BKKD2_UtB-gIs9q1A2Ivl9wdV8RWvd2Li/exec";
+
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
