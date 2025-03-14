@@ -2,7 +2,7 @@
 const scriptUrl = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjKydTuO6tFIXoRLbaGkdFyW14Wpof0Ned9Dbb9mDx3TMtpeJ7S0_TEedAwxkdhSQISWkVmtHC-fPy8dEm3Hud02j-r3BYkyJlVa3d2QS3onm_9invGwaZ9H7Poky4YTK4zm3w-53koWYQG7trKrdTF6s4skzNzEet-Hgy5iIqOOeJGhtyqvdt_m0W2MMd5_hRWB88Rre63bfC0fHVLYWe9fP5wVyEixeNvmZ5HI-AiCzPdNm8AgQCk8H-3H-VuV1vjAhl9rcPF2mp0htwBdeUZ2mHxnQ&lib=MnewecsndWBLjpOhrm3CYVHKRT9d30hqB";
 
 // 📌 URL del Web App de Google Apps Script (Actualizada para POST con CORS habilitado)
-const postUrl = "https://script.google.com/macros/s/AKfycbzZbZ2C3j0hGUW6JMXkeO10k79SfKqO1L7AYEoSMBKDlRQb6MHQ1tTySTF36RI-LV4B/exec";
+const postUrl = "https://script.google.com/macros/s/AKfycbxlpoM5fcC67sYgdXRfFc-2eIelgICgvJDOAX_9LYrJgFzgsVNckrnMqfbatvbLmADk/exec";
 
 // 📌 Elementos del DOM
 const buscador = document.getElementById("buscador");
