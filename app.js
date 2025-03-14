@@ -13,15 +13,31 @@ async function obtenerPalabrasDesdeCSV() {
         const data = await respuesta.text();
         const filas = data.split("\n").map(line => line.split(","));
 
-        // 📌 Extraer los datos y convertirlos en un objeto JSON
+        // 📌 Verifica si la primera fila contiene los títulos correctos
+        const encabezados = filas[0].map(titulo => titulo.trim().toLowerCase());
+        console.log("📌 Encabezados encontrados en CSV:", encabezados);
+
+        // 📌 Encuentra las posiciones de cada columna
+        const colEspanol = encabezados.indexOf("español");
+        const colTotonaco = encabezados.indexOf("totonaco");
+        const colEjemplo = encabezados.indexOf("ejemplo");
+        const colFuente = encabezados.indexOf("fuente");
+
+        // 📌 Si no encuentra los encabezados, muestra un error
+        if (colEspanol === -1 || colTotonaco === -1) {
+            console.error("❌ Error: No se encontraron las columnas correctas en el CSV.");
+            return;
+        }
+
+        // 📌 Extraer datos basados en las posiciones de las columnas
         palabras = filas.slice(1).map(columna => ({
-            espanol: columna[0]?.trim() || "Desconocido",
-            totonaco: columna[1]?.trim() || "Desconocido",
-            ejemplo: columna[2]?.trim() || "Sin ejemplo",
-            fuente: columna[3]?.trim() || "Desconocido"
+            espanol: columna[colEspanol]?.trim() || "No disponible",
+            totonaco: columna[colTotonaco]?.trim() || "No disponible",
+            ejemplo: columna[colEjemplo]?.trim() || "Sin ejemplo",
+            fuente: columna[colFuente]?.trim() || "Desconocido"
         }));
 
-        console.log("✅ Palabras obtenidas correctamente:", palabras);
+        console.log("✅ Palabras extraídas correctamente:", palabras);
     } catch (error) {
         console.error("❌ Error al obtener los datos:", error);
     }
