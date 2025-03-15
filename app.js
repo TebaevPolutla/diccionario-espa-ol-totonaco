@@ -55,34 +55,31 @@
         const formulario = document.getElementById("formulario");
         const mensaje = document.getElementById("mensaje");
 
-        // 📌 Obtener palabras desde Firestore
-        async function obtenerPalabrasDesdeFirestore() {
-            try {
-                console.log("🔍 Obteniendo datos desde Firestore...");
-                const querySnapshot = await db.collection("palabras").get();
+        let palabrasGlobal = []; // Guardar palabras para mejorar rendimiento
 
-                let palabras = [];
-                querySnapshot.forEach(doc => {
-                    palabras.push(doc.data());
+        // 📌 Obtener palabras desde Firestore en tiempo real
+        function obtenerPalabrasDesdeFirestore() {
+            console.log("🔍 Cargando palabras desde Firestore...");
+            db.collection("palabras").onSnapshot((querySnapshot) => {
+                palabrasGlobal = [];
+                querySnapshot.forEach((doc) => {
+                    palabrasGlobal.push(doc.data());
                 });
 
-                console.log("✅ Palabras obtenidas:", palabras);
-                return palabras;
-            } catch (error) {
+                console.log("✅ Palabras obtenidas:", palabrasGlobal);
+            }, (error) => {
                 console.error("❌ Error al obtener datos:", error);
-                return [];
-            }
+            });
         }
 
         // 📌 Función para buscar palabras exactas
-        async function filtrarPalabras() {
+        function filtrarPalabras() {
             const termino = buscador.value.toLowerCase().trim();
             resultado.innerHTML = "";
 
             if (termino === "") return;
 
-            const palabras = await obtenerPalabrasDesdeFirestore();
-            const filtradas = palabras.filter(palabra => 
+            const filtradas = palabrasGlobal.filter(palabra => 
                 palabra.espanol.toLowerCase() === termino || 
                 palabra.totonaco.toLowerCase() === termino
             );
@@ -127,21 +124,22 @@
                 console.log("✅ Palabra agregada correctamente.");
                 mensaje.textContent = "✅ Palabra enviada correctamente.";
                 formulario.reset();
-                
-                // 🔄 Actualizar la lista sin recargar la página
-                obtenerPalabrasDesdeFirestore();
+
             } catch (error) {
                 console.error("❌ Error al enviar la palabra:", error);
                 mensaje.textContent = "❌ Error al enviar la palabra.";
             }
         });
 
-        // 📌 Cargar palabras al inicio
+        // 📌 Cargar palabras en tiempo real
+        obtenerPalabrasDesdeFirestore();
         buscador.addEventListener("input", () => setTimeout(() => filtrarPalabras(), 300));
     </script>
 
 </body>
 </html>
- 
+
+
+  
        
-    
+
