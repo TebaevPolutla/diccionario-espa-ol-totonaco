@@ -5,30 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diccionario Español - Totonaco</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- 🔍 Fuentes y Estilos Adicionales -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 📌 Estilos Mejorados */
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .mensaje {
+            background: #0073e6; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 5px; 
+            display: inline-block; 
+            max-width: 90%; 
+            font-size: 14px;
+        }
+
+        .imagen {
+            max-width: 70%; 
+            height: auto; 
+            margin: 15px auto;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* 📌 Estilos de Búsqueda */
+        input {
+            width: 85%;
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 400px;
+            margin: 10px auto;
+            text-align: left;
+        }
+
+        li {
+            background: white;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
+
     <h1>Diccionario Español - Totonaco</h1>
 
     <!-- 📌 Mensaje de Bienvenida -->
     <p class="mensaje">
-        Bienvenidos a nuestro diccionario interactivo, este proyecto es parte del PAEC del Telebachillerato Polutla,
-        que tiene como finalidad el rescate y promoción del idioma Totonaco.
-        Busca palabras en español y descubre su significado en totonaco.
+        Bienvenidos a nuestro diccionario interactivo. Este proyecto es parte del PAEC del Telebachillerato Polutla,
+        que tiene como finalidad el rescate y promoción del idioma Totonaco.  
+        🔍 Busca palabras en español y descubre su significado en totonaco.
     </p>
 
     <!-- 📌 Imagen representativa -->
-    <img src="TEBAPOLUTLA.JPG" alt="Imagen representativa" class="imagen">
+    <img src="TEBAPOLUTLA.JPG" alt="Imagen representativa" class="imagen" loading="lazy">
 
     <!-- 📌 Campo de búsqueda -->
-    <input type="text" id="buscador" placeholder="Escribe una palabra...">
+    <input type="text" id="buscador" placeholder="Escribe una palabra..." aria-label="Buscar palabra">
     <ul id="resultado"></ul>
 
     <!-- 📌 Conectar el JavaScript -->
     <script src="app.js" type="module"></script>
 </body>
 </html>
-
-
-         
-                
-          
