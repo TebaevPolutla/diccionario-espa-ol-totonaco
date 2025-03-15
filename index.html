@@ -8,10 +8,42 @@
     <!-- 🔥 Agregar Firebase desde el CDN oficial -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background-color: #f9f9f9; }
+        h1 { color: #333; }
+        .mensaje {
+            background: #0073e6; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 5px; 
+            display: inline-block; 
+            max-width: 600px; 
+            margin: 10px auto;
+        }
+        .imagen {
+            max-width: 100%; 
+            height: auto; 
+            margin: 10px 0;
+        }
+        input, button { margin: 5px; padding: 8px; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 5px; border-bottom: 1px solid #ddd; }
+    </style>
 </head>
 <body>
 
     <h1>Diccionario Español - Totonaco</h1>
+
+    <!-- 📌 Mensaje de Bienvenida -->
+    <p class="mensaje">
+        Bienvenidos a nuestro diccionario interactivo. Este proyecto es parte del PAEC del Telebachillerato Polutla,
+        con el objetivo de rescatar y promover el idioma Totonaco.  
+        🔍 Busca palabras en español y descubre su significado en totonaco.
+    </p>
+
+    <!-- 📌 Imagen representativa -->
+    <img src="TEBAPOLUTLA.JPG" alt="Imagen representativa" class="imagen">
 
     <!-- 📌 Campo de búsqueda -->
     <input type="text" id="buscador" placeholder="Escribe una palabra...">
@@ -63,10 +95,11 @@
                 return palabras;
             } catch (error) {
                 console.error("❌ Error al obtener datos:", error);
+                return [];
             }
         }
 
-        // 📌 Función para buscar palabras
+        // 📌 Función para buscar palabras exactas
         async function filtrarPalabras() {
             const termino = buscador.value.toLowerCase().trim();
             resultado.innerHTML = "";
@@ -103,6 +136,14 @@
             }
 
             try {
+                // 📌 Verificar si la palabra ya existe
+                const consulta = await db.collection("palabras").where("espanol", "==", nuevoEspanol).get();
+
+                if (!consulta.empty) {
+                    mensaje.textContent = "⚠️ La palabra ya existe en la base de datos.";
+                    return;
+                }
+
                 await db.collection("palabras").add({
                     espanol: nuevoEspanol,
                     totonaco: nuevoTotonaco
@@ -111,6 +152,9 @@
                 console.log("✅ Palabra agregada correctamente.");
                 mensaje.textContent = "✅ Palabra enviada correctamente.";
                 formulario.reset();
+                
+                // 🔄 Actualizar la lista sin recargar la página
+                obtenerPalabrasDesdeFirestore();
             } catch (error) {
                 console.error("❌ Error al enviar la palabra:", error);
                 mensaje.textContent = "❌ Error al enviar la palabra.";
@@ -125,3 +169,4 @@
 </html>
 
    
+    
