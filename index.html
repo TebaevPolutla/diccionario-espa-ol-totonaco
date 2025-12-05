@@ -1,32 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diccionario Español - Totonaco</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diccionario Español - Totonaco</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Diccionario Español - Totonaco</h1>
+  <h1>Diccionario Español - Totonaco</h1>
 
-    <!-- 📌 Mensaje de Bienvenida -->
-    <p class="mensaje">
-        Bienvenidos a nuestro diccionario interactivo, este proyecto es parte del PAEC del Telebachillerato Polutla,
-        que tiene como finalidad el rescate y promoción del idioma Totonaco.
-        Busca palabras en español y descubre su significado en totonaco.
-    </p>
+  <p class="mensaje">
+    Bienvenidos a nuestro diccionario interactivo, este proyecto es parte del PAEC del Telebachillerato Polutla,
+    que tiene como finalidad el rescate y promoción del idioma Totonaco.
+    Busca palabras en español y descubre su significado en totonaco.
+  </p>
 
-    <!-- 📌 Imagen representativa -->
-    <img src="TEBAPOLUTLA.JPG" alt="Imagen representativa" class="imagen">
+  <img src="TEBAPOLUTLA.JPG" alt="Imagen representativa" class="imagen">
 
-    <!-- 📌 Campo de búsqueda -->
-    <input type="text" id="buscador" placeholder="Escribe una palabra...">
-    <ul id="resultado"></ul>
+  <!-- 📌 Campo de búsqueda -->
+  <input type="text" id="buscador" placeholder="Escribe una palabra...">
+  <button onclick="buscarPalabra()">Buscar</button>
 
-    <!-- 📌 Conectar el JavaScript -->
-    <script src="app.js" type="module"></script>
+  <div id="resultado"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
-
-
-  
