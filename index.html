@@ -11,6 +11,11 @@
             margin: 20px;
         }
 
+        img {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+
         input, button {
             padding: 8px;
             margin: 10px;
@@ -34,6 +39,7 @@
 <body>
 
     <h1>Diccionario Español - Totonaco</h1>
+    <img src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG" alt="TEBA Polutla">
     <p>Escribe una palabra en español o totonaco y ve su traducción.</p>
 
     <input type="text" id="buscador" placeholder="Escribe una palabra...">
@@ -42,7 +48,7 @@
     <script>
         let diccionario = [];
 
-        // Cargar las palabras desde el archivo JSON
+        // 📦 Cargar las palabras desde palabras.json en GitHub Pages
         fetch("palabras.json")
             .then(response => response.json())
             .then(data => {
@@ -53,7 +59,7 @@
                 console.error("❌ Error al cargar palabras.json:", error);
             });
 
-        // Función de búsqueda
+        // 🔍 Función de búsqueda
         function buscarPalabra() {
             const entrada = document.getElementById("buscador").value.trim().toLowerCase();
             const resultado = document.getElementById("resultado");
@@ -75,7 +81,7 @@
             }
         }
 
-        // Escuchar escritura
+        // ⌨️ Escuchar entrada en el buscador
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("buscador").addEventListener("input", () => {
                 setTimeout(buscarPalabra, 300);
