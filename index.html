@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diccionario Español - Totonaco</title>
   <style>
     body {
@@ -10,10 +10,11 @@
       text-align: center;
       margin: 20px;
     }
-    img {
-      max-width: 80%;       /* Imagen ocupará hasta 80% del ancho de la pantalla */
+    img.banner {
+      width: 100%;
+      max-width: 800px;  /* puedes cambiar este valor al ancho que deseas */
       height: auto;
-      margin-bottom: 20px;
+      margin: 20px auto;
     }
     input, button {
       padding: 8px;
@@ -34,8 +35,9 @@
   </style>
 </head>
 <body>
+
   <h1>Diccionario Español - Totonaco</h1>
-  <img src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG" alt="TEBA Polutla">
+  <img class="banner" src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG" alt="TEBA Polutla">
   <p>Escribe una palabra en español o totonaco y ve su traducción.</p>
 
   <input type="text" id="buscador" placeholder="Escribe una palabra...">
@@ -46,7 +48,7 @@
 
     fetch("palabras.json")
       .then(response => response.json())
-      .then(data => { diccionario = data; })
+      .then(data => { diccionario = data; /*console.log(diccionario);*/ })
       .catch(error => console.error("Error al cargar palabras:", error));
 
     function buscarPalabra() {
@@ -75,7 +77,9 @@
         .addEventListener("input", () => { setTimeout(buscarPalabra, 300); });
     });
   </script>
+
 </body>
 </html>
+
 
 
