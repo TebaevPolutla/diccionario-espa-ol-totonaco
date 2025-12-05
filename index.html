@@ -11,21 +11,22 @@
       margin: 20px;
     }
     img.banner {
-      width: 100%;
-      max-width: 800px;  /* puedes cambiar este valor al ancho que deseas */
+      width: 80%;         /* Imagen ocupa 80% del ancho de la pantalla */
+      max-width: 600px;   /* Máximo ancho: 600px (ajústalo si quieres) */
       height: auto;
-      margin: 20px auto;
+      margin-bottom: 20px;
     }
-    input, button {
+    input {
       padding: 8px;
-      margin: 10px;
       width: 250px;
+      margin: 10px auto;
+      display: block;
     }
     ul {
       list-style: none;
       padding: 0;
       max-width: 400px;
-      margin: auto;
+      margin: 20px auto;
     }
     li {
       padding: 10px;
@@ -37,7 +38,8 @@
 <body>
 
   <h1>Diccionario Español - Totonaco</h1>
-  <img class="banner" src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG" alt="TEBA Polutla">
+  <img class="banner" src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG"
+       alt="TEBA Polutla">
   <p>Escribe una palabra en español o totonaco y ve su traducción.</p>
 
   <input type="text" id="buscador" placeholder="Escribe una palabra...">
@@ -47,9 +49,9 @@
     let diccionario = [];
 
     fetch("palabras.json")
-      .then(response => response.json())
-      .then(data => { diccionario = data; /*console.log(diccionario);*/ })
-      .catch(error => console.error("Error al cargar palabras:", error));
+      .then(res => res.json())
+      .then(data => { diccionario = data; console.log("Diccionario cargado:", diccionario); })
+      .catch(err => console.error("Error al cargar palabras.json:", err));
 
     function buscarPalabra() {
       const entrada = document.getElementById("buscador").value.trim().toLowerCase();
@@ -72,9 +74,8 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("buscador")
-        .addEventListener("input", () => { setTimeout(buscarPalabra, 300); });
+    document.getElementById("buscador").addEventListener("input", () => {
+      setTimeout(buscarPalabra, 300);
     });
   </script>
 
