@@ -1,94 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diccionario Español - Totonaco</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-
-        img {
-            max-width: 300px;
-            margin-bottom: 20px;
-        }
-
-        input, button {
-            padding: 8px;
-            margin: 10px;
-            width: 250px;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            max-width: 400px;
-            margin: auto;
-        }
-
-        li {
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-            background-color: #f9f9f9;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diccionario Español - Totonaco</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    img {
+      max-width: 80%;       /* Imagen ocupará hasta 80% del ancho de la pantalla */
+      height: auto;
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 10px;
+      width: 250px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 400px;
+      margin: auto;
+    }
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
+  <h1>Diccionario Español - Totonaco</h1>
+  <img src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG" alt="TEBA Polutla">
+  <p>Escribe una palabra en español o totonaco y ve su traducción.</p>
 
-    <h1>Diccionario Español - Totonaco</h1>
-    <img src="https://raw.githubusercontent.com/TebaevPolutla/diccionario-espa-ol-totonaco/main/TEBAPOLUTLA.JPG" alt="TEBA Polutla">
-    <p>Escribe una palabra en español o totonaco y ve su traducción.</p>
+  <input type="text" id="buscador" placeholder="Escribe una palabra...">
+  <ul id="resultado"></ul>
 
-    <input type="text" id="buscador" placeholder="Escribe una palabra...">
-    <ul id="resultado"></ul>
+  <script>
+    let diccionario = [];
 
-    <script>
-        let diccionario = [];
+    fetch("palabras.json")
+      .then(response => response.json())
+      .then(data => { diccionario = data; })
+      .catch(error => console.error("Error al cargar palabras:", error));
 
-        // 📦 Cargar las palabras desde palabras.json en GitHub Pages
-        fetch("palabras.json")
-            .then(response => response.json())
-            .then(data => {
-                diccionario = data;
-                console.log("✅ Diccionario cargado correctamente:", diccionario);
-            })
-            .catch(error => {
-                console.error("❌ Error al cargar palabras.json:", error);
-            });
+    function buscarPalabra() {
+      const entrada = document.getElementById("buscador").value.trim().toLowerCase();
+      const resultado = document.getElementById("resultado");
+      resultado.innerHTML = "";
 
-        // 🔍 Función de búsqueda
-        function buscarPalabra() {
-            const entrada = document.getElementById("buscador").value.trim().toLowerCase();
-            const resultado = document.getElementById("resultado");
-            resultado.innerHTML = "";
+      const encontrados = diccionario.filter(p =>
+        p.espanol.toLowerCase().trim() === entrada ||
+        p.totonaco.toLowerCase().trim() === entrada
+      );
 
-            const encontrados = diccionario.filter(p =>
-                p.espanol.toLowerCase().trim() === entrada ||
-                p.totonaco.toLowerCase().trim() === entrada
-            );
-
-            if (encontrados.length > 0) {
-                encontrados.forEach(p => {
-                    const li = document.createElement("li");
-                    li.innerHTML = `<strong>${p.espanol}</strong> → ${p.totonaco}`;
-                    resultado.appendChild(li);
-                });
-            } else {
-                resultado.innerHTML = "<li>No se encontró esa palabra.</li>";
-            }
-        }
-
-        // ⌨️ Escuchar entrada en el buscador
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("buscador").addEventListener("input", () => {
-                setTimeout(buscarPalabra, 300);
-            });
+      if (encontrados.length > 0) {
+        encontrados.forEach(p => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${p.espanol}</strong> → ${p.totonaco}`;
+          resultado.appendChild(li);
         });
-    </script>
+      } else {
+        resultado.innerHTML = "<li>No se encontró esa palabra.</li>";
+      }
+    }
 
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("buscador")
+        .addEventListener("input", () => { setTimeout(buscarPalabra, 300); });
+    });
+  </script>
 </body>
 </html>
+
 
