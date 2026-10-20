@@ -1,6 +1,165 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14212b"><meta name="description" content="Traductor de palabras Totonaco Español y Español Totonaco"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css"><title>Traductor Totonaco – Español | Español – Totonaco</title></head>
-<body><main><section class="hero" id="inicio"><div class="shade"><div class="brand">TELEBACHILLERATO POLUTLA <span>• Proyecto comunitario</span></div><h1>Traductor<br>Totonaco – Español<br><em>Español – Totonaco</em></h1><p class="intro">Busca palabras en cualquiera de los dos idiomas y descubre su traducción.</p><div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 5 5"/></svg><input id="q" autocomplete="off" spellcheck="false" placeholder="Escribe una palabra…" aria-label="Buscar palabra">
-    <button id="buscar" type="button">Buscar</button>
-    <button id="clear" type="button" aria-label="Borrar búsqueda">×</button>
-    </div><div id="results" class="results" aria-live="polite"><p class="hint">Escribe una palabra para ver su traducción.</p></div><p class="help">¿No encontraste una palabra?</p><a class="add" href="#proponer">Proponer una palabra</a></div></section>
-<section class="proposal" id="proponer" hidden><a href="#inicio" class="back">← Volver al traductor</a><h2>Agregar nueva palabra</h2><p>Ayúdanos a ampliar el traductor. Las propuestas serán revisadas antes de publicarse.</p><form id="proposalForm"><label for="es">Español</label><input id="es" required maxlength="140" placeholder="Ej. Casa"><label for="to">Totonaco</label><input id="to" required maxlength="140" placeholder="Ej. Chik"><label for="community">Comunidad o variante (opcional)</label><input id="community" maxlength="140" placeholder="Ej. Polutla"><button type="submit">Guardar propuesta de prueba</button><small>Versión de prueba: esta propuesta se guarda únicamente en este navegador y se podrá revisar en el panel local del mismo navegador. No se envía a internet. No publiques esta versión como panel real.</small><p id="formStatus" role="status"></p></form></section></main><footer><a href="admin.html">Panel de administración (prueba local)</a> · <span id="count"></span> pares de traducción de la base proporcionada · Telebachillerato Polutla</footer><script src="app.js" defer></script></body></html>
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#14212b">
+  <meta name="description" content="Diccionario Español–Totonaco y Totonaco–Español del Telebachillerato Polutla">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+
+  <title>Diccionario Español–Totonaco | Telebachillerato Polutla</title>
+</head>
+
+<body>
+  <main>
+
+    <section class="hero" id="inicio">
+      <div class="shade">
+
+        <div class="brand">
+          TELEBACHILLERATO POLUTLA
+          <span>• Proyecto comunitario</span>
+        </div>
+
+        <h1>
+          Traductor<br>
+          Totonaco – Español<br>
+          <em>Español – Totonaco</em>
+        </h1>
+
+        <p class="intro">
+          Busca palabras en cualquiera de los dos idiomas
+          y descubre su traducción.
+        </p>
+
+        <div class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m16.5 16.5 5 5"/>
+          </svg>
+
+          <input
+            id="q"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Escribe una palabra…"
+            aria-label="Buscar palabra"
+          >
+
+          <button id="buscar" type="button">
+            Buscar
+          </button>
+
+          <button
+            id="clear"
+            type="button"
+            aria-label="Borrar búsqueda"
+          >
+            ×
+          </button>
+        </div>
+
+        <div id="results" class="results" aria-live="polite">
+          <p class="hint">
+            Escribe una palabra para ver su traducción.
+          </p>
+        </div>
+
+        <p class="help">
+          ¿No encontraste una palabra?
+        </p>
+
+        <a class="add" href="#proponer">
+          Proponer una palabra
+        </a>
+
+      </div>
+    </section>
+
+    <section class="proposal" id="proponer" hidden>
+
+      <a href="#inicio" class="back">
+        ← Volver al traductor
+      </a>
+
+      <h2>Proponer una palabra</h2>
+
+      <p>
+        Ayúdanos a enriquecer el Diccionario Español–Totonaco.
+        Comparte una palabra y su traducción.
+        Todas las propuestas serán revisadas antes de publicarse.
+      </p>
+
+      <form id="proposalForm">
+
+        <label for="es">Español</label>
+        <input
+          id="es"
+          name="espanol"
+          type="text"
+          required
+          maxlength="100"
+          placeholder="Ej. Casa"
+        >
+
+        <label for="to">Totonaco</label>
+        <input
+          id="to"
+          name="totonaco"
+          type="text"
+          required
+          maxlength="100"
+          placeholder="Escribe la traducción"
+        >
+
+        <label for="community">
+          Comunidad o variante (opcional)
+        </label>
+
+        <input
+          id="community"
+          name="comunidad"
+          type="text"
+          maxlength="140"
+          placeholder="Ej. Polutla"
+        >
+
+        <!-- Turnstile se incorpora mediante app.js -->
+
+        <button type="submit">
+          Enviar propuesta
+        </button>
+
+        <small>
+          Tu propuesta se enviará para revisión.
+          No aparecerá en el diccionario hasta que
+          sea aprobada por el administrador.
+          Puedes enviar hasta 10 propuestas cada 24 horas,
+          esperando al menos 60 segundos entre envíos.
+        </small>
+
+        <p
+          id="formStatus"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+      </form>
+    </section>
+
+  </main>
+
+  <footer>
+    <span id="count"></span>
+    traducciones disponibles
+    · Telebachillerato Polutla
+    · Proyecto comunitario
+  </footer>
+
+  <script src="app.js" defer></script>
+
+</body>
+</html>
