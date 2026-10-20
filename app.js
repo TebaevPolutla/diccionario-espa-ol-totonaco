@@ -4,6 +4,7 @@ const initialHeight = Math.max(
   window.innerHeight,
   initialWidth <= 500 ? 750 : 700
 );
+
 document.documentElement.style.setProperty(
   '--alto-inicial',
   initialHeight + 'px'
@@ -13,6 +14,9 @@ document.documentElement.style.setProperty(
 
 const API_URL =
   'https://traductor-totonaco-api.eduardopereznani.workers.dev/';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAAFeOoR4lrHD_E-5o';
+const PROPOSAL_ENDPOINT = API_URL + 'api/propuestas';
 
 const $ = id => document.getElementById(id);
 
@@ -32,6 +36,7 @@ function approvedLocal() {
     const data = JSON.parse(
       localStorage.getItem('aprobadas-demo') || '[]'
     );
+
     return Array.isArray(data)
       ? data.filter(w => w && w.espanol && w.totonaco)
       : [];
@@ -54,6 +59,7 @@ function validWords(items) {
 
 function matchLocal(query) {
   const all = [...localWords, ...approvedLocal()];
+
   const exact = all.filter(w =>
     normalize(w.espanol) === query ||
     normalize(w.totonaco) === query
@@ -210,13 +216,12 @@ $('buscar').addEventListener('click', () => {
   search();
 });
 
-$('q').addEventListener('keydown', (evento) => {
+$('q').addEventListener('keydown', evento => {
   if (evento.key === 'Enter') {
     evento.preventDefault();
     search();
   }
 });
-
 
 $('clear').addEventListener('click', () => {
   clearTimeout(searchTimer);
@@ -256,47 +261,179 @@ fetch('palabras.json')
 
 showMessage('Escribe una palabra para ver su traducción.');
 
-// Las propuestas todavía se guardan localmente.
-$('proposalForm').addEventListener('submit', e => {
-  e.preventDefault();
+// PROTECCION TURNSTILE PARA PROPUESTAS
 
-  const proposal = {
-    id: crypto.randomUUID
-      ? crypto.randomUUID()
-      : String(Date.now()) + Math.random(),
+let turnstileWidgetId = null;
+let turnstileReady = false;
 
-    espanol: $('es').value.trim(),
-    totonaco: $('to').value.trim(),
-    comunidad: $('community').value.trim(),
-    fecha: new Date().toISOString(),
-    estado: 'pendiente-local'
+function setFormMessage(message) {
+  $('formStatus').textContent = message;
+}
+
+function loadTurnstile() {
+  const form = $('proposalForm');
+  if (!form) return;
+
+  const container = document.createElement('div');
+  container.id = 'turnstile-propuestas';
+  container.style.margin = '16px 0';
+
+  const submit = form.querySelector('[type="submit"]');
+
+  if (submit) {
+    submit.parentNode.insertBefore(container, submit);
+  } else {
+    form.appendChild(container);
+  }
+
+  const script = document.createElement('script');
+
+  script.src =
+    'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+
+  script.async = true;
+  script.defer = true;
+
+  script.onload = () => {
+    if (!window.turnstile) {
+      setFormMessage(
+        'No se pudo iniciar la verificación de seguridad.'
+      );
+      return;
+    }
+
+    turnstileWidgetId = window.turnstile.render(container, {
+      sitekey: TURNSTILE_SITE_KEY,
+      theme: 'auto',
+
+      callback: () => {
+        setFormMessage(
+          'Verificación lista. Ya puedes enviar tu propuesta.'
+        );
+      },
+
+      'expired-callback': () => {
+        setFormMessage(
+          'La verificación venció. Complétala de nuevo.'
+        );
+      },
+
+      'error-callback': () => {
+        setFormMessage(
+          'Error al verificar. Vuelve a intentarlo.'
+        );
+      }
+    });
+
+    turnstileReady = true;
   };
 
-  if (!proposal.espanol || !proposal.totonaco) return;
-
-  let list = [];
-
-  try {
-    list = JSON.parse(
-      localStorage.getItem('propuestas-demo') || '[]'
+  script.onerror = () => {
+    setFormMessage(
+      'No se pudo cargar la verificación. Revisa tu conexión.'
     );
-  } catch {}
+  };
 
-  if (!Array.isArray(list)) list = [];
+  document.head.appendChild(script);
+}
 
-  list.push(proposal);
+loadTurnstile();
 
-  localStorage.setItem(
-    'propuestas-demo',
-    JSON.stringify(list)
+// ENVIO DE PROPUESTAS A CLOUDFLARE D1
+
+$('proposalForm').addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const form = $('proposalForm');
+  const button = form.querySelector('[type="submit"]');
+
+  const proposal = {
+    espanol: $('es').value.trim(),
+    totonaco: $('to').value.trim(),
+    comunidad: $('community').value.trim()
+  };
+
+  if (!proposal.espanol || !proposal.totonaco) {
+    setFormMessage(
+      'Escribe la palabra en español y su traducción.'
+    );
+    return;
+  }
+
+  if (
+    !turnstileReady ||
+    turnstileWidgetId === null ||
+    !window.turnstile
+  ) {
+    setFormMessage(
+      'Espera a que cargue la verificación de seguridad.'
+    );
+    return;
+  }
+
+  const token = window.turnstile.getResponse(
+    turnstileWidgetId
   );
 
-  $('formStatus').textContent =
-    'Propuesta pendiente guardada en este navegador. ' +
-    'Todavía no se envía por internet.';
+  if (!token) {
+    setFormMessage(
+      'Completa primero la verificación de seguridad.'
+    );
+    return;
+  }
 
-  $('proposalForm').reset();
+  if (button) button.disabled = true;
+
+  setFormMessage('Enviando propuesta…');
+
+  try {
+    const response = await fetch(PROPOSAL_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ...proposal,
+        turnstileToken: token
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'No se pudo enviar la propuesta.'
+      );
+    }
+
+    setFormMessage(
+      data.mensaje || 'Propuesta recibida para revisión.'
+    );
+
+    if (!data.duplicada) {
+      form.reset();
+    }
+
+  } catch (error) {
+    setFormMessage(
+      error.message || 'No se pudo enviar. Inténtalo más tarde.'
+    );
+
+    console.warn(
+      'Error al enviar propuesta:',
+      error
+    );
+
+  } finally {
+    window.turnstile?.reset(turnstileWidgetId);
+
+    if (button) {
+      button.disabled = false;
+    }
+  }
 });
+
+// SERVICIO LOCAL
 
 if (
   'serviceWorker' in navigator &&
@@ -308,11 +445,18 @@ if (
     );
 }
 
+// CAMBIO ENTRE BUSCADOR Y FORMULARIO
 
 const pantallaTraductor = document.querySelector('.hero');
-const pantallaFormulario = document.getElementById('proponer');
-const botonProponer = document.querySelector('a[href="#proponer"]');
-const botonVolver = document.querySelector('#proponer .back');
+
+const pantallaFormulario =
+  document.getElementById('proponer');
+
+const botonProponer =
+  document.querySelector('a[href="#proponer"]');
+
+const botonVolver =
+  document.querySelector('#proponer .back');
 
 if (pantallaTraductor && pantallaFormulario) {
   function cambiarPantalla(mostrarFormulario) {
@@ -329,17 +473,18 @@ if (pantallaTraductor && pantallaFormulario) {
     );
 
     pantallaFormulario.hidden = !mostrarFormulario;
+
     window.scrollTo(0, 0);
   }
 
   cambiarPantalla(false);
 
-  botonProponer?.addEventListener('click', (e) => {
+  botonProponer?.addEventListener('click', e => {
     e.preventDefault();
     cambiarPantalla(true);
   });
 
-  botonVolver?.addEventListener('click', (e) => {
+  botonVolver?.addEventListener('click', e => {
     e.preventDefault();
     cambiarPantalla(false);
   });
