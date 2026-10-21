@@ -6,25 +6,11 @@ TELEBACHILLERATO POLUTLA
 APP.JS COMPLETO
 
 CORRECCIÓN:
+- Búsqueda por idioma desde Cloudflare D1
 - Prioridad absoluta a coincidencias exactas
-- Sugerencias solo cuando no hay coincidencia exacta
-- Sugerencias identificadas claramente
-- Búsqueda separada por idioma
-- Sin mezclar español y totonaco
-
-CONSERVA:
-- Cloudflare D1
-- Respaldo local
-- Propuestas de palabras
-- Cloudflare Turnstile
-- Registro de visitas
-- Estadísticas públicas
-- Navegación del sitio
-
-NO MODIFICA:
-- Worker
-- Base de datos
-- Traducciones almacenadas
+- Sugerencias solamente si no hay coincidencia exacta
+- Conserva propuestas, Turnstile y contador
+- Conserva respaldo local y navegación
 ==================================================
 */
 
@@ -62,8 +48,7 @@ const PROPOSAL_ENDPOINT =
 const COUNTER_ENDPOINT =
   API_URL + 'api/contador';
 
-const $ = id =>
-  document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 // ========================================
 // NORMALIZACIÓN
@@ -131,7 +116,6 @@ function approvedLocal() {
     );
 
     return validWords(data);
-
   } catch {
     return [];
   }
@@ -149,12 +133,9 @@ function uniqueWords(items) {
       normalize(word.espanol) + '\u0000' +
       normalize(word.totonaco);
 
-    if (seen.has(key)) {
-      return false;
-    }
+    if (seen.has(key)) return false;
 
     seen.add(key);
-
     return true;
   });
 }
@@ -165,10 +146,9 @@ function uniqueWords(items) {
 
 function classifyResults(items, query) {
   const source = sourceField();
-
   const words = uniqueWords(items);
 
-  // PRIMERO: COINCIDENCIAS EXACTAS
+  // PRIORIDAD 1: COINCIDENCIA EXACTA
 
   const exact = words.filter(word =>
     normalize(word[source]) === query
@@ -181,14 +161,13 @@ function classifyResults(items, query) {
     };
   }
 
-  // SEGUNDO: SUGERENCIAS QUE COMIENZAN
-  // CON LA PALABRA BUSCADA
+  // PRIORIDAD 2: PALABRAS QUE COMIENZAN IGUAL
 
   const startsWith = words.filter(word =>
     normalize(word[source]).startsWith(query)
   );
 
-  // TERCERO: OTRAS COINCIDENCIAS PARCIALES
+  // PRIORIDAD 3: PALABRAS QUE CONTIENEN EL TEXTO
 
   const contains = words.filter(word => {
     const value = normalize(word[source]);
@@ -222,12 +201,13 @@ function classifyResults(items, query) {
 // ========================================
 
 function matchLocal(query) {
-  const all = [
-    ...localWords,
-    ...approvedLocal()
-  ];
-
-  return classifyResults(all, query);
+  return classifyResults(
+    [
+      ...localWords,
+      ...approvedLocal()
+    ],
+    query
+  );
 }
 
 // ========================================
@@ -241,8 +221,7 @@ function showMessage(message) {
 
   out.replaceChildren();
 
-  const paragraph =
-    document.createElement('p');
+  const paragraph = document.createElement('p');
 
   paragraph.className = 'hint';
   paragraph.textContent = message;
@@ -269,19 +248,13 @@ function display(result) {
     showMessage(
       'No encontramos esa palabra. Puedes proponerla en el formulario.'
     );
-
     return;
   }
 
-  // AVISO CUANDO NO EXISTE
-  // UNA COINCIDENCIA EXACTA
-
   if (result.type === 'suggestions') {
-    const notice =
-      document.createElement('p');
+    const notice = document.createElement('p');
 
     notice.className = 'hint';
-
     notice.textContent =
       'No encontramos una coincidencia exacta. Estas son palabras relacionadas:';
 
@@ -299,38 +272,24 @@ function display(result) {
       : 'Totonaco → Español';
 
   for (const word of result.items) {
-    const row =
-      document.createElement('div');
-
+    const row = document.createElement('div');
     row.className = 'entry';
 
-    const left =
-      document.createElement('div');
+    const left = document.createElement('div');
 
-    const title =
-      document.createElement('strong');
+    const title = document.createElement('strong');
+    title.textContent = word[source];
 
-    title.textContent =
-      word[source];
-
-    const info =
-      document.createElement('small');
-
-    info.textContent =
-      directionLabel;
+    const info = document.createElement('small');
+    info.textContent = directionLabel;
 
     left.append(title, info);
 
-    const right =
-      document.createElement('div');
-
+    const right = document.createElement('div');
     right.className = 'translation';
-
-    right.textContent =
-      word[target];
+    right.textContent = word[target];
 
     row.append(left, right);
-
     out.appendChild(row);
   }
 }
@@ -340,23 +299,15 @@ function display(result) {
 // ========================================
 
 function setSearchDirection(direction) {
-  if (
-    direction !== 'es' &&
-    direction !== 'to'
-  ) {
+  if (direction !== 'es' && direction !== 'to') {
     return;
   }
 
   searchDirection = direction;
 
-  const spanishButton =
-    $('direction-es');
-
-  const totonacButton =
-    $('direction-to');
-
-  const input =
-    $('q');
+  const spanishButton = $('direction-es');
+  const totonacButton = $('direction-to');
+  const input = $('q');
 
   if (spanishButton) {
     spanishButton.classList.toggle(
@@ -399,7 +350,6 @@ function setSearchDirection(direction) {
   }
 
   clearTimeout(searchTimer);
-
   ++requestNumber;
 
   showMessage(
@@ -413,16 +363,12 @@ function setSearchDirection(direction) {
 
 $('direction-es')?.addEventListener(
   'click',
-  () => {
-    setSearchDirection('es');
-  }
+  () => setSearchDirection('es')
 );
 
 $('direction-to')?.addEventListener(
   'click',
-  () => {
-    setSearchDirection('to');
-  }
+  () => setSearchDirection('to')
 );
 
 setSearchDirection('es');
@@ -436,50 +382,43 @@ async function search() {
 
   if (!input) return;
 
-  const rawQuery =
-    input.value.trim();
+  const rawQuery = input.value.trim();
+  const query = normalize(rawQuery);
 
-  const query =
-    normalize(rawQuery);
-
-  const current =
-    ++requestNumber;
-
-  const directionAtStart =
-    searchDirection;
+  const current = ++requestNumber;
+  const directionAtStart = searchDirection;
 
   if (!query) {
     showMessage(
       'Escribe una palabra para ver su traducción.'
     );
-
     return;
   }
 
-  showMessage(
-    'Buscando traducción…'
-  );
+  showMessage('Buscando traducción…');
 
   try {
+    // CAMBIO PRINCIPAL:
+    // ENVIAR PALABRA E IDIOMA A CLOUDFLARE.
+
+    const params = new URLSearchParams({
+      palabra: rawQuery,
+      idioma: directionAtStart
+    });
+
     const response = await fetch(
-      API_URL +
-      '?palabra=' +
-      encodeURIComponent(rawQuery)
+      API_URL + '?' + params.toString(),
+      { cache: 'no-store' }
     );
 
     if (!response.ok) {
-      throw new Error(
-        'HTTP ' + response.status
-      );
+      throw new Error('HTTP ' + response.status);
     }
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
     if (!Array.isArray(data.resultados)) {
-      throw new Error(
-        'Respuesta no válida'
-      );
+      throw new Error('Respuesta no válida');
     }
 
     if (
@@ -489,16 +428,18 @@ async function search() {
       return;
     }
 
+    // SOLO RESULTADOS DEL IDIOMA SELECCIONADO.
+    // CONSERVAR PALABRAS APROBADAS LOCALMENTE.
+
     const combined = [
       ...validWords(data.resultados),
       ...approvedLocal()
     ];
 
-    const result =
-      classifyResults(
-        combined,
-        query
-      );
+    const result = classifyResults(
+      combined,
+      query
+    );
 
     display(result);
 
@@ -511,10 +452,7 @@ async function search() {
     }
 
     if (localReady) {
-      display(
-        matchLocal(query)
-      );
-
+      display(matchLocal(query));
     } else {
       showMessage(
         'No se pudo consultar Cloudflare. Revisa tu conexión a internet.'
@@ -532,24 +470,18 @@ async function search() {
 // CONTROLES DEL BUSCADOR
 // ========================================
 
-$('q')?.addEventListener(
-  'input',
-  () => {
-    clearTimeout(searchTimer);
+$('q')?.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  ++requestNumber;
 
-    ++requestNumber;
-
-    showMessage(
-      'Presiona Buscar para ver la traducción.'
-    );
-  }
-);
+  showMessage(
+    'Presiona Buscar para ver la traducción.'
+  );
+});
 
 $('buscar')?.addEventListener(
   'click',
-  () => {
-    search();
-  }
+  () => search()
 );
 
 $('q')?.addEventListener(
@@ -557,7 +489,6 @@ $('q')?.addEventListener(
   event => {
     if (event.key === 'Enter') {
       event.preventDefault();
-
       search();
     }
   }
@@ -569,11 +500,9 @@ $('clear')?.addEventListener(
     clearTimeout(searchTimer);
 
     const input = $('q');
-
     if (!input) return;
 
     input.value = '';
-
     ++requestNumber;
 
     showMessage(
@@ -591,9 +520,7 @@ $('clear')?.addEventListener(
 fetch(API_URL)
   .then(response => {
     if (!response.ok) {
-      throw new Error(
-        'HTTP ' + response.status
-      );
+      throw new Error('HTTP ' + response.status);
     }
 
     return response.json();
@@ -622,17 +549,13 @@ fetch(API_URL)
 fetch('palabras.json')
   .then(response => {
     if (!response.ok) {
-      throw new Error(
-        'HTTP ' + response.status
-      );
+      throw new Error('HTTP ' + response.status);
     }
 
     return response.json();
   })
   .then(data => {
-    localWords =
-      validWords(data);
-
+    localWords = validWords(data);
     localReady = true;
 
     const count = $('count');
@@ -672,12 +595,10 @@ let turnstileWidgetId = null;
 let turnstileReady = false;
 
 function setFormMessage(message) {
-  const status =
-    $('formStatus');
+  const status = $('formStatus');
 
   if (status) {
-    status.textContent =
-      message;
+    status.textContent = message;
   }
 }
 
@@ -686,37 +607,29 @@ function setFormMessage(message) {
 // ========================================
 
 function loadTurnstile() {
-  const form =
-    $('proposalForm');
+  const form = $('proposalForm');
 
   if (!form) return;
 
-  const container =
-    document.createElement('div');
+  const container = document.createElement('div');
 
-  container.id =
-    'turnstile-propuestas';
+  container.id = 'turnstile-propuestas';
+  container.style.margin = '16px 0';
 
-  container.style.margin =
-    '16px 0';
-
-  const submit =
-    form.querySelector(
-      '[type="submit"]'
-    );
+  const submit = form.querySelector(
+    '[type="submit"]'
+  );
 
   if (submit) {
     submit.parentNode.insertBefore(
       container,
       submit
     );
-
   } else {
     form.appendChild(container);
   }
 
-  const script =
-    document.createElement('script');
+  const script = document.createElement('script');
 
   script.src =
     'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -729,36 +642,34 @@ function loadTurnstile() {
       setFormMessage(
         'No se pudo iniciar la verificación de seguridad.'
       );
-
       return;
     }
 
-    turnstileWidgetId =
-      window.turnstile.render(
-        container,
-        {
-          sitekey: TURNSTILE_SITE_KEY,
-          theme: 'auto',
+    turnstileWidgetId = window.turnstile.render(
+      container,
+      {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'auto',
 
-          callback: () => {
-            setFormMessage(
-              'Verificación lista. Ya puedes enviar tu propuesta.'
-            );
-          },
+        callback: () => {
+          setFormMessage(
+            'Verificación lista. Ya puedes enviar tu propuesta.'
+          );
+        },
 
-          'expired-callback': () => {
-            setFormMessage(
-              'La verificación venció. Complétala de nuevo.'
-            );
-          },
+        'expired-callback': () => {
+          setFormMessage(
+            'La verificación venció. Complétala de nuevo.'
+          );
+        },
 
-          'error-callback': () => {
-            setFormMessage(
-              'Error al verificar. Vuelve a intentarlo.'
-            );
-          }
+        'error-callback': () => {
+          setFormMessage(
+            'Error al verificar. Vuelve a intentarlo.'
+          );
         }
-      );
+      }
+    );
 
     turnstileReady = true;
   };
@@ -769,9 +680,7 @@ function loadTurnstile() {
     );
   };
 
-  document.head.appendChild(
-    script
-  );
+  document.head.appendChild(script);
 }
 
 loadTurnstile();
@@ -785,23 +694,16 @@ $('proposalForm')?.addEventListener(
   async event => {
     event.preventDefault();
 
-    const form =
-      $('proposalForm');
+    const form = $('proposalForm');
 
-    const button =
-      form.querySelector(
-        '[type="submit"]'
-      );
+    const button = form.querySelector(
+      '[type="submit"]'
+    );
 
     const proposal = {
-      espanol:
-        $('es').value.trim(),
-
-      totonaco:
-        $('to').value.trim(),
-
-      comunidad:
-        $('community').value.trim()
+      espanol: $('es').value.trim(),
+      totonaco: $('to').value.trim(),
+      comunidad: $('community').value.trim()
     };
 
     if (
@@ -811,7 +713,6 @@ $('proposalForm')?.addEventListener(
       setFormMessage(
         'Escribe la palabra en español y su traducción.'
       );
-
       return;
     }
 
@@ -823,20 +724,17 @@ $('proposalForm')?.addEventListener(
       setFormMessage(
         'Espera a que cargue la verificación de seguridad.'
       );
-
       return;
     }
 
-    const token =
-      window.turnstile.getResponse(
-        turnstileWidgetId
-      );
+    const token = window.turnstile.getResponse(
+      turnstileWidgetId
+    );
 
     if (!token) {
       setFormMessage(
         'Completa primero la verificación de seguridad.'
       );
-
       return;
     }
 
@@ -844,9 +742,7 @@ $('proposalForm')?.addEventListener(
       button.disabled = true;
     }
 
-    setFormMessage(
-      'Enviando propuesta…'
-    );
+    setFormMessage('Enviando propuesta…');
 
     try {
       const response = await fetch(
@@ -855,8 +751,7 @@ $('proposalForm')?.addEventListener(
           method: 'POST',
 
           headers: {
-            'Content-Type':
-              'application/json'
+            'Content-Type': 'application/json'
           },
 
           body: JSON.stringify({
@@ -866,8 +761,7 @@ $('proposalForm')?.addEventListener(
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -922,8 +816,7 @@ if (
     .getRegistrations()
     .then(registrations =>
       registrations.forEach(
-        registration =>
-          registration.unregister()
+        registration => registration.unregister()
       )
     );
 }
@@ -952,22 +845,16 @@ if (
   pantallaTraductor &&
   pantallaFormulario
 ) {
-  function cambiarPantalla(
-    mostrarFormulario
-  ) {
+  function cambiarPantalla(mostrarFormulario) {
     pantallaTraductor.style.setProperty(
       'display',
-      mostrarFormulario
-        ? 'none'
-        : '',
+      mostrarFormulario ? 'none' : '',
       'important'
     );
 
     pantallaFormulario.style.setProperty(
       'display',
-      mostrarFormulario
-        ? 'block'
-        : 'none',
+      mostrarFormulario ? 'block' : 'none',
       'important'
     );
 
@@ -983,7 +870,6 @@ if (
     'click',
     event => {
       event.preventDefault();
-
       cambiarPantalla(true);
     }
   );
@@ -992,7 +878,6 @@ if (
     'click',
     event => {
       event.preventDefault();
-
       cambiarPantalla(false);
     }
   );
@@ -1017,8 +902,7 @@ function obtenerIdentificadorVisitante() {
       !identificador ||
       !patron.test(identificador)
     ) {
-      identificador =
-        crypto.randomUUID();
+      identificador = crypto.randomUUID();
 
       localStorage.setItem(
         clave,
@@ -1029,9 +913,7 @@ function obtenerIdentificadorVisitante() {
     return identificador;
 
   } catch (error) {
-    if (
-      !window.__diccionarioVisitanteTemporal
-    ) {
+    if (!window.__diccionarioVisitanteTemporal) {
       window.__diccionarioVisitanteTemporal =
         crypto.randomUUID();
     }
@@ -1064,14 +946,10 @@ function mostrarCifrasContador(datos) {
     new Intl.NumberFormat('es-MX');
 
   const visitas =
-    formato.format(
-      datos.visitas
-    );
+    formato.format(datos.visitas);
 
   const visitantes =
-    formato.format(
-      datos.visitantes
-    );
+    formato.format(datos.visitantes);
 
   const tarjetaVisitas =
     $('stats-visits');
@@ -1080,13 +958,11 @@ function mostrarCifrasContador(datos) {
     $('stats-unique');
 
   if (tarjetaVisitas) {
-    tarjetaVisitas.textContent =
-      visitas;
+    tarjetaVisitas.textContent = visitas;
   }
 
   if (tarjetaVisitantes) {
-    tarjetaVisitantes.textContent =
-      visitantes;
+    tarjetaVisitantes.textContent = visitantes;
   }
 
   // COMPATIBILIDAD CON DISEÑO ANTERIOR
@@ -1098,8 +974,7 @@ function mostrarCifrasContador(datos) {
     $('contador-unicos');
 
   if (contadorAnteriorVisitas) {
-    contadorAnteriorVisitas.textContent =
-      visitas;
+    contadorAnteriorVisitas.textContent = visitas;
   }
 
   if (contadorAnteriorVisitantes) {
@@ -1130,12 +1005,9 @@ async function consultarEstadisticasPublicas() {
       );
     }
 
-    const datos =
-      await respuesta.json();
+    const datos = await respuesta.json();
 
-    if (
-      !mostrarCifrasContador(datos)
-    ) {
+    if (!mostrarCifrasContador(datos)) {
       throw new Error(
         'La respuesta GET no contiene estadísticas válidas.'
       );
@@ -1168,8 +1040,7 @@ async function iniciarContadorPublico() {
         method: 'POST',
 
         headers: {
-          'X-Visitor-Id':
-            identificador
+          'X-Visitor-Id': identificador
         },
 
         cache: 'no-store'
@@ -1183,17 +1054,14 @@ async function iniciarContadorPublico() {
     }
 
     try {
-      const datos =
-        await respuesta.json();
+      const datos = await respuesta.json();
 
       if (
         datos &&
         typeof datos.visitas === 'number' &&
         typeof datos.visitantes === 'number'
       ) {
-        mostrarCifrasContador(
-          datos
-        );
+        mostrarCifrasContador(datos);
       }
 
     } catch {
@@ -1223,18 +1091,15 @@ iniciarContadorPublico();
 FIN DE APP.JS
 
 BÚSQUEDA:
-1. Coincidencia exacta.
-2. Si no existe, sugerencias relacionadas.
-3. Separación por idioma.
-
-ESTADÍSTICAS:
-POST registra visita.
-GET consulta estadísticas.
+- Español: idioma=es
+- Totonaco: idioma=to
+- Coincidencia exacta primero
+- Sugerencias después
 
 CLOUDFLARE D1:
-Sin modificaciones.
+- Sin modificaciones a los datos
 
-WORKER:
-Sin modificaciones.
+PROPUESTAS, TURNSTILE Y CONTADOR:
+- Funciones conservadas
 ==================================================
 */
