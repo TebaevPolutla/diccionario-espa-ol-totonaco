@@ -1,31 +1,39 @@
-
 /*
 ==============================================
 TRADUCTOR TOTONACO–ESPAÑOL
 TELEBACHILLERATO POLUTLA
 
 APP.JS COMPLETO
-CORRECCIÓN DEL CONTADOR PÚBLICO
 
-Conserva:
+VERSIÓN CON SELECTOR DE IDIOMA
+
+CONSERVA:
 - Búsqueda en Cloudflare D1
 - Búsqueda local de respaldo
 - Propuestas de palabras
 - Cloudflare Turnstile
-- Identificación original de visitantes
-- Registro de visitas en Cloudflare
-- Navegación entre traductor y formulario
+- Identificación de visitantes
+- Registro de visitas
+- Estadísticas públicas
+- Navegación entre pantallas
 
-Corrección:
-- Registro de visita mediante POST
-- Consulta de estadísticas mediante GET
-- Actualización directa del nuevo diseño
-- Sin duplicar registros por consultas GET
-- Sin modificar la base de traducciones
+NUEVO:
+- Español → Totonaco
+- Totonaco → Español
+- Filtrado por idioma seleccionado
+- Resultados con dirección correcta
+- Cancelación lógica de búsquedas anteriores
+
+NO MODIFICA:
+- Worker
+- Base D1
+- Traducciones almacenadas
 ==============================================
 */
 
+// ========================================
 // ALTURA INICIAL
+// ========================================
 
 const initialWidth = window.innerWidth;
 
@@ -41,7 +49,9 @@ document.documentElement.style.setProperty(
 
 'use strict';
 
-// CONFIGURACIÓN ORIGINAL
+// ========================================
+// CONFIGURACIÓN
+// ========================================
 
 const API_URL =
   'https://traductor-totonaco-api.eduardopereznani.workers.dev/';
@@ -55,18 +65,69 @@ const PROPOSAL_ENDPOINT =
 const COUNTER_ENDPOINT =
   API_URL + 'api/contador';
 
-const $ = id => document.getElementById(id);
+const $ = id =>
+  document.getElementById(id);
 
-const normalize = s => String(s || '')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '')
-  .toLocaleLowerCase('es')
-  .trim();
+// ========================================
+// NORMALIZACIÓN
+// ========================================
+
+const normalize = value =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('es')
+    .trim();
+
+// ========================================
+// VARIABLES
+// ========================================
 
 let localWords = [];
 let localReady = false;
+
 let requestNumber = 0;
 let searchTimer;
+
+let searchDirection = 'es';
+
+// ========================================
+// DIRECCIÓN DE TRADUCCIÓN
+// ========================================
+
+function sourceField() {
+  return searchDirection === 'es'
+    ? 'espanol'
+    : 'totonaco';
+}
+
+function targetField() {
+  return searchDirection === 'es'
+    ? 'totonaco'
+    : 'espanol';
+}
+
+function matchesDirection(word, query) {
+  return normalize(
+    word[sourceField()]
+  ).includes(query);
+}
+
+// ========================================
+// VALIDACIÓN DE PALABRAS
+// ========================================
+
+function validWords(items) {
+  return Array.isArray(items)
+    ? items.filter(word =>
+        word &&
+        typeof word.espanol === 'string' &&
+        typeof word.totonaco === 'string' &&
+        word.espanol.trim() &&
+        word.totonaco.trim()
+      )
+    : [];
+}
 
 // ========================================
 // PALABRAS APROBADAS LOCALMENTE
@@ -78,52 +139,75 @@ function approvedLocal() {
       localStorage.getItem('aprobadas-demo') || '[]'
     );
 
-    return Array.isArray(data)
-      ? data.filter(w =>
-          w &&
-          w.espanol &&
-          w.totonaco
-        )
-      : [];
+    return validWords(data);
 
   } catch {
     return [];
   }
 }
 
-function validWords(items) {
-  return Array.isArray(items)
-    ? items.filter(w =>
-        w &&
-        typeof w.espanol === 'string' &&
-        typeof w.totonaco === 'string' &&
-        w.espanol.trim() &&
-        w.totonaco.trim()
-      )
-    : [];
-}
+// ========================================
+// ELIMINAR DUPLICADOS
+// ========================================
 
-function matchLocal(query) {
-  const all = [
-    ...localWords,
-    ...approvedLocal()
-  ];
+function uniqueWords(items) {
+  const seen = new Set();
 
-  const exact = all.filter(w =>
-    normalize(w.espanol) === query ||
-    normalize(w.totonaco) === query
-  );
+  return validWords(items).filter(word => {
+    const key =
+      normalize(word.espanol) + '\u0000' +
+      normalize(word.totonaco);
 
-  return exact.length
-    ? exact.slice(0, 30)
-    : all.filter(w =>
-        normalize(w.espanol).includes(query) ||
-        normalize(w.totonaco).includes(query)
-      ).slice(0, 30);
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+
+    return true;
+  });
 }
 
 // ========================================
-// RESULTADOS DEL TRADUCTOR
+// FILTRAR POR IDIOMA
+// ========================================
+
+function filterByDirection(items, query) {
+  const source = sourceField();
+
+  const matches = validWords(items).filter(
+    word =>
+      normalize(word[source]).includes(query)
+  );
+
+  const exact = matches.filter(
+    word =>
+      normalize(word[source]) === query
+  );
+
+  return exact.length
+    ? exact
+    : matches;
+}
+
+// ========================================
+// RESPALDO LOCAL
+// ========================================
+
+function matchLocal(query) {
+  const all = uniqueWords([
+    ...localWords,
+    ...approvedLocal()
+  ]);
+
+  return filterByDirection(
+    all,
+    query
+  ).slice(0, 30);
+}
+
+// ========================================
+// MOSTRAR MENSAJES
 // ========================================
 
 function showMessage(message) {
@@ -133,12 +217,18 @@ function showMessage(message) {
 
   out.replaceChildren();
 
-  const p = document.createElement('p');
-  p.className = 'hint';
-  p.textContent = message;
+  const paragraph =
+    document.createElement('p');
 
-  out.appendChild(p);
+  paragraph.className = 'hint';
+  paragraph.textContent = message;
+
+  out.appendChild(paragraph);
 }
+
+// ========================================
+// MOSTRAR RESULTADOS
+// ========================================
 
 function display(items, query) {
   const out = $('results');
@@ -147,67 +237,161 @@ function display(items, query) {
 
   out.replaceChildren();
 
-  if (!items.length) {
+  const ordered =
+    filterByDirection(items, query);
+
+  if (!ordered.length) {
     showMessage(
       'No encontramos esa palabra. Puedes proponerla en el formulario.'
     );
+
     return;
   }
 
-  const exact = items.filter(w =>
-    normalize(w.espanol) === query ||
-    normalize(w.totonaco) === query
-  );
+  const source = sourceField();
+  const target = targetField();
 
-  const ordered = exact.length
-    ? exact
-    : items;
+  const directionLabel =
+    searchDirection === 'es'
+      ? 'Español → Totonaco'
+      : 'Totonaco → Español';
 
-  for (const w of ordered.slice(0, 30)) {
-    const row = document.createElement('div');
+  for (const word of ordered.slice(0, 30)) {
+    const row =
+      document.createElement('div');
+
     row.className = 'entry';
 
-    const left = document.createElement('div');
+    const left =
+      document.createElement('div');
 
-    const right = document.createElement('div');
+    const title =
+      document.createElement('strong');
+
+    title.textContent =
+      word[source];
+
+    const info =
+      document.createElement('small');
+
+    info.textContent =
+      directionLabel;
+
+    left.append(
+      title,
+      info
+    );
+
+    const right =
+      document.createElement('div');
+
     right.className = 'translation';
 
-    const spanish =
-      normalize(w.espanol).includes(query) &&
-      !normalize(w.totonaco).includes(query);
+    right.textContent =
+      word[target];
 
-    const totonac =
-      normalize(w.totonaco).includes(query) &&
-      !normalize(w.espanol).includes(query);
-
-    const first = totonac
-      ? w.totonaco
-      : w.espanol;
-
-    const second = totonac
-      ? w.espanol
-      : w.totonaco;
-
-    const title = document.createElement('strong');
-    title.textContent = first;
-
-    const info = document.createElement('small');
-
-    info.textContent = totonac
-      ? 'Totonaco → Español'
-      : spanish
-        ? 'Español → Totonaco'
-        : 'Español ↔ Totonaco';
-
-    left.append(title, info);
-
-    right.textContent = second;
-
-    row.append(left, right);
+    row.append(
+      left,
+      right
+    );
 
     out.appendChild(row);
   }
 }
+
+// ========================================
+// CAMBIAR DIRECCIÓN DE BÚSQUEDA
+// ========================================
+
+function setSearchDirection(direction) {
+  if (
+    direction !== 'es' &&
+    direction !== 'to'
+  ) {
+    return;
+  }
+
+  searchDirection = direction;
+
+  const spanishButton =
+    $('direction-es');
+
+  const totonacButton =
+    $('direction-to');
+
+  const input =
+    $('q');
+
+  if (spanishButton) {
+    spanishButton.classList.toggle(
+      'active',
+      direction === 'es'
+    );
+
+    spanishButton.setAttribute(
+      'aria-pressed',
+      String(direction === 'es')
+    );
+  }
+
+  if (totonacButton) {
+    totonacButton.classList.toggle(
+      'active',
+      direction === 'to'
+    );
+
+    totonacButton.setAttribute(
+      'aria-pressed',
+      String(direction === 'to')
+    );
+  }
+
+  if (input) {
+    input.placeholder =
+      direction === 'es'
+        ? 'Escribe una palabra en español...'
+        : 'Escribe una palabra en totonaco...';
+
+    input.setAttribute(
+      'aria-label',
+      direction === 'es'
+        ? 'Buscar una palabra en español'
+        : 'Buscar una palabra en totonaco'
+    );
+
+    input.value = '';
+  }
+
+  clearTimeout(searchTimer);
+
+  ++requestNumber;
+
+  showMessage(
+    'Escribe una palabra para ver su traducción.'
+  );
+}
+
+// ========================================
+// BOTONES DE DIRECCIÓN
+// ========================================
+
+$('direction-es')?.addEventListener(
+  'click',
+  () => {
+    setSearchDirection('es');
+  }
+);
+
+$('direction-to')?.addEventListener(
+  'click',
+  () => {
+    setSearchDirection('to');
+  }
+);
+
+// IDIOMA PREDETERMINADO
+
+setSearchDirection('es');
 
 // ========================================
 // BÚSQUEDA EN CLOUDFLARE D1
@@ -218,22 +402,35 @@ async function search() {
 
   if (!input) return;
 
-  const query = normalize(input.value);
-  const current = ++requestNumber;
+  const rawQuery =
+    input.value.trim();
+
+  const query =
+    normalize(rawQuery);
+
+  const current =
+    ++requestNumber;
+
+  const directionAtStart =
+    searchDirection;
 
   if (!query) {
     showMessage(
       'Escribe una palabra para ver su traducción.'
     );
+
     return;
   }
 
-  showMessage('Buscando traducción…');
+  showMessage(
+    'Buscando traducción…'
+  );
 
   try {
     const response = await fetch(
-      API_URL + '?palabra=' +
-      encodeURIComponent(input.value.trim())
+      API_URL +
+      '?palabra=' +
+      encodeURIComponent(rawQuery)
     );
 
     if (!response.ok) {
@@ -242,43 +439,58 @@ async function search() {
       );
     }
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
     if (!Array.isArray(data.resultados)) {
-      throw new Error('Respuesta no válida');
+      throw new Error(
+        'Respuesta no válida'
+      );
     }
 
-    if (current !== requestNumber) return;
+    // EVITAR RESULTADOS DE BÚSQUEDAS
+    // ANTERIORES O DE OTRO IDIOMA
 
-    const combined = [
+    if (
+      current !== requestNumber ||
+      directionAtStart !== searchDirection
+    ) {
+      return;
+    }
+
+    // RESULTADOS DE D1 MÁS
+    // PALABRAS APROBADAS LOCALMENTE
+
+    const combined = uniqueWords([
       ...validWords(data.resultados),
       ...approvedLocal()
-    ];
+    ]);
 
-    const seen = new Set();
+    const filtered =
+      filterByDirection(
+        combined,
+        query
+      );
 
-    const unique = combined.filter(w => {
-      const key =
-        normalize(w.espanol) + '\u0000' +
-        normalize(w.totonaco);
-
-      if (seen.has(key)) return false;
-
-      seen.add(key);
-      return true;
-
-    }).filter(w =>
-      normalize(w.espanol).includes(query) ||
-      normalize(w.totonaco).includes(query)
+    display(
+      filtered,
+      query
     );
 
-    display(unique, query);
-
   } catch (error) {
-    if (current !== requestNumber) return;
+    if (
+      current !== requestNumber ||
+      directionAtStart !== searchDirection
+    ) {
+      return;
+    }
 
     if (localReady) {
-      display(matchLocal(query), query);
+      display(
+        matchLocal(query),
+        query
+      );
+
     } else {
       showMessage(
         'No se pudo consultar Cloudflare. Revisa tu conexión a internet.'
@@ -296,52 +508,71 @@ async function search() {
 // CONTROLES DEL BUSCADOR
 // ========================================
 
-$('q')?.addEventListener('input', () => {
-  clearTimeout(searchTimer);
+$('q')?.addEventListener(
+  'input',
+  () => {
+    clearTimeout(searchTimer);
 
-  ++requestNumber;
+    ++requestNumber;
 
-  showMessage(
-    'Presiona Buscar para ver la traducción.'
-  );
-});
+    showMessage(
+      'Presiona Buscar para ver la traducción.'
+    );
+  }
+);
 
-$('buscar')?.addEventListener('click', () => {
-  search();
-});
-
-$('q')?.addEventListener('keydown', evento => {
-  if (evento.key === 'Enter') {
-    evento.preventDefault();
+$('buscar')?.addEventListener(
+  'click',
+  () => {
     search();
   }
-});
+);
 
-$('clear')?.addEventListener('click', () => {
-  clearTimeout(searchTimer);
+$('q')?.addEventListener(
+  'keydown',
+  event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
 
-  $('q').value = '';
+      search();
+    }
+  }
+);
 
-  ++requestNumber;
+$('clear')?.addEventListener(
+  'click',
+  () => {
+    clearTimeout(searchTimer);
 
-  showMessage(
-    'Escribe una palabra para ver su traducción.'
-  );
+    const input = $('q');
 
-  $('q').focus();
-});
+    if (!input) return;
+
+    input.value = '';
+
+    ++requestNumber;
+
+    showMessage(
+      'Escribe una palabra para ver su traducción.'
+    );
+
+    input.focus();
+  }
+);
 
 // ========================================
-// TOTAL DE TRADUCCIONES DISPONIBLES
+// TOTAL DE TRADUCCIONES
 // ========================================
 
 fetch(API_URL)
-  .then(r => {
-    if (!r.ok) {
-      throw new Error('HTTP ' + r.status);
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(
+        'HTTP ' + response.status
+      );
     }
 
-    return r.json();
+    return response.json();
   })
   .then(data => {
     if (
@@ -361,77 +592,107 @@ fetch(API_URL)
   });
 
 // ========================================
-// RESPALDO LOCAL
+// CARGAR RESPALDO LOCAL
 // ========================================
 
 fetch('palabras.json')
-  .then(r => {
-    if (!r.ok) {
-      throw new Error('HTTP ' + r.status);
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(
+        'HTTP ' + response.status
+      );
     }
 
-    return r.json();
+    return response.json();
   })
   .then(data => {
-    localWords = validWords(data);
+    localWords =
+      validWords(data);
+
     localReady = true;
 
     const count = $('count');
 
     if (
       count &&
-      (!count.textContent.trim() ||
-       count.textContent.trim() === '—')
+      (
+        !count.textContent.trim() ||
+        count.textContent.trim() === '—'
+      )
     ) {
       count.textContent =
         new Intl.NumberFormat('es-MX')
           .format(localWords.length);
     }
   })
-  .catch(() => {});
+  .catch(error => {
+    console.warn(
+      'No se pudo cargar el respaldo local:',
+      error
+    );
+  });
+
+// ========================================
+// MENSAJE INICIAL
+// ========================================
 
 showMessage(
   'Escribe una palabra para ver su traducción.'
 );
 
 // ========================================
-// PROTECCIÓN TURNSTILE PARA PROPUESTAS
+// PROTECCIÓN TURNSTILE
 // ========================================
 
 let turnstileWidgetId = null;
 let turnstileReady = false;
 
 function setFormMessage(message) {
-  const status = $('formStatus');
+  const status =
+    $('formStatus');
 
   if (status) {
-    status.textContent = message;
+    status.textContent =
+      message;
   }
 }
 
+// ========================================
+// CARGAR TURNSTILE
+// ========================================
+
 function loadTurnstile() {
-  const form = $('proposalForm');
+  const form =
+    $('proposalForm');
 
   if (!form) return;
 
-  const container = document.createElement('div');
+  const container =
+    document.createElement('div');
 
-  container.id = 'turnstile-propuestas';
-  container.style.margin = '16px 0';
+  container.id =
+    'turnstile-propuestas';
+
+  container.style.margin =
+    '16px 0';
 
   const submit =
-    form.querySelector('[type="submit"]');
+    form.querySelector(
+      '[type="submit"]'
+    );
 
   if (submit) {
     submit.parentNode.insertBefore(
       container,
       submit
     );
+
   } else {
     form.appendChild(container);
   }
 
-  const script = document.createElement('script');
+  const script =
+    document.createElement('script');
 
   script.src =
     'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -444,32 +705,36 @@ function loadTurnstile() {
       setFormMessage(
         'No se pudo iniciar la verificación de seguridad.'
       );
+
       return;
     }
 
     turnstileWidgetId =
-      window.turnstile.render(container, {
-        sitekey: TURNSTILE_SITE_KEY,
-        theme: 'auto',
+      window.turnstile.render(
+        container,
+        {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: 'auto',
 
-        callback: () => {
-          setFormMessage(
-            'Verificación lista. Ya puedes enviar tu propuesta.'
-          );
-        },
+          callback: () => {
+            setFormMessage(
+              'Verificación lista. Ya puedes enviar tu propuesta.'
+            );
+          },
 
-        'expired-callback': () => {
-          setFormMessage(
-            'La verificación venció. Complétala de nuevo.'
-          );
-        },
+          'expired-callback': () => {
+            setFormMessage(
+              'La verificación venció. Complétala de nuevo.'
+            );
+          },
 
-        'error-callback': () => {
-          setFormMessage(
-            'Error al verificar. Vuelve a intentarlo.'
-          );
+          'error-callback': () => {
+            setFormMessage(
+              'Error al verificar. Vuelve a intentarlo.'
+            );
+          }
         }
-      });
+      );
 
     turnstileReady = true;
   };
@@ -480,13 +745,15 @@ function loadTurnstile() {
     );
   };
 
-  document.head.appendChild(script);
+  document.head.appendChild(
+    script
+  );
 }
 
 loadTurnstile();
 
 // ========================================
-// ENVÍO DE PROPUESTAS A CLOUDFLARE D1
+// ENVÍO DE PROPUESTAS
 // ========================================
 
 $('proposalForm')?.addEventListener(
@@ -494,15 +761,23 @@ $('proposalForm')?.addEventListener(
   async event => {
     event.preventDefault();
 
-    const form = $('proposalForm');
+    const form =
+      $('proposalForm');
 
     const button =
-      form.querySelector('[type="submit"]');
+      form.querySelector(
+        '[type="submit"]'
+      );
 
     const proposal = {
-      espanol: $('es').value.trim(),
-      totonaco: $('to').value.trim(),
-      comunidad: $('community').value.trim()
+      espanol:
+        $('es').value.trim(),
+
+      totonaco:
+        $('to').value.trim(),
+
+      comunidad:
+        $('community').value.trim()
     };
 
     if (
@@ -512,6 +787,7 @@ $('proposalForm')?.addEventListener(
       setFormMessage(
         'Escribe la palabra en español y su traducción.'
       );
+
       return;
     }
 
@@ -523,17 +799,20 @@ $('proposalForm')?.addEventListener(
       setFormMessage(
         'Espera a que cargue la verificación de seguridad.'
       );
+
       return;
     }
 
-    const token = window.turnstile.getResponse(
-      turnstileWidgetId
-    );
+    const token =
+      window.turnstile.getResponse(
+        turnstileWidgetId
+      );
 
     if (!token) {
       setFormMessage(
         'Completa primero la verificación de seguridad.'
       );
+
       return;
     }
 
@@ -541,16 +820,21 @@ $('proposalForm')?.addEventListener(
       button.disabled = true;
     }
 
-    setFormMessage('Enviando propuesta…');
+    setFormMessage(
+      'Enviando propuesta…'
+    );
 
     try {
       const response = await fetch(
         PROPOSAL_ENDPOINT,
         {
           method: 'POST',
+
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type':
+              'application/json'
           },
+
           body: JSON.stringify({
             ...proposal,
             turnstileToken: token
@@ -558,7 +842,8 @@ $('proposalForm')?.addEventListener(
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -609,14 +894,18 @@ if (
     location.hostname
   )
 ) {
-  navigator.serviceWorker.getRegistrations()
-    .then(regs =>
-      regs.forEach(reg => reg.unregister())
+  navigator.serviceWorker
+    .getRegistrations()
+    .then(registrations =>
+      registrations.forEach(
+        registration =>
+          registration.unregister()
+      )
     );
 }
 
 // ========================================
-// CAMBIO ENTRE BUSCADOR Y FORMULARIO
+// NAVEGACIÓN ENTRE PANTALLAS
 // ========================================
 
 const pantallaTraductor =
@@ -639,16 +928,22 @@ if (
   pantallaTraductor &&
   pantallaFormulario
 ) {
-  function cambiarPantalla(mostrarFormulario) {
+  function cambiarPantalla(
+    mostrarFormulario
+  ) {
     pantallaTraductor.style.setProperty(
       'display',
-      mostrarFormulario ? 'none' : '',
+      mostrarFormulario
+        ? 'none'
+        : '',
       'important'
     );
 
     pantallaFormulario.style.setProperty(
       'display',
-      mostrarFormulario ? 'block' : 'none',
+      mostrarFormulario
+        ? 'block'
+        : 'none',
       'important'
     );
 
@@ -662,23 +957,25 @@ if (
 
   botonProponer?.addEventListener(
     'click',
-    e => {
-      e.preventDefault();
+    event => {
+      event.preventDefault();
+
       cambiarPantalla(true);
     }
   );
 
   botonVolver?.addEventListener(
     'click',
-    e => {
-      e.preventDefault();
+    event => {
+      event.preventDefault();
+
       cambiarPantalla(false);
     }
   );
 }
 
 // ========================================
-// CONTADOR PÚBLICO DE VISITAS
+// IDENTIFICADOR DEL VISITANTE
 // ========================================
 
 function obtenerIdentificadorVisitante() {
@@ -696,7 +993,8 @@ function obtenerIdentificadorVisitante() {
       !identificador ||
       !patron.test(identificador)
     ) {
-      identificador = crypto.randomUUID();
+      identificador =
+        crypto.randomUUID();
 
       localStorage.setItem(
         clave,
@@ -742,12 +1040,16 @@ function mostrarCifrasContador(datos) {
     new Intl.NumberFormat('es-MX');
 
   const visitas =
-    formato.format(datos.visitas);
+    formato.format(
+      datos.visitas
+    );
 
   const visitantes =
-    formato.format(datos.visitantes);
+    formato.format(
+      datos.visitantes
+    );
 
-  // TARJETAS DEL NUEVO DISEÑO
+  // TARJETAS DEL DISEÑO ACTUAL
 
   const tarjetaVisitas =
     $('stats-visits');
@@ -756,7 +1058,8 @@ function mostrarCifrasContador(datos) {
     $('stats-unique');
 
   if (tarjetaVisitas) {
-    tarjetaVisitas.textContent = visitas;
+    tarjetaVisitas.textContent =
+      visitas;
   }
 
   if (tarjetaVisitantes) {
@@ -786,8 +1089,8 @@ function mostrarCifrasContador(datos) {
 }
 
 // ========================================
-// CONSULTAR ESTADÍSTICAS SIN REGISTRAR
-// UNA VISITA ADICIONAL
+// CONSULTAR ESTADÍSTICAS
+// SIN REGISTRAR OTRA VISITA
 // ========================================
 
 async function consultarEstadisticasPublicas() {
@@ -806,9 +1109,12 @@ async function consultarEstadisticasPublicas() {
       );
     }
 
-    const datos = await respuesta.json();
+    const datos =
+      await respuesta.json();
 
-    if (!mostrarCifrasContador(datos)) {
+    if (
+      !mostrarCifrasContador(datos)
+    ) {
       throw new Error(
         'La respuesta GET no contiene estadísticas válidas.'
       );
@@ -827,8 +1133,7 @@ async function consultarEstadisticasPublicas() {
 }
 
 // ========================================
-// REGISTRAR UNA VISITA Y ACTUALIZAR
-// LAS ESTADÍSTICAS DEL NUEVO DISEÑO
+// REGISTRAR VISITA
 // ========================================
 
 async function iniciarContadorPublico() {
@@ -836,16 +1141,16 @@ async function iniciarContadorPublico() {
     const identificador =
       obtenerIdentificadorVisitante();
 
-    // CONSERVAMOS EL REGISTRO ORIGINAL:
-    // POST CON X-Visitor-Id.
-
     const respuesta = await fetch(
       COUNTER_ENDPOINT,
       {
         method: 'POST',
+
         headers: {
-          'X-Visitor-Id': identificador
+          'X-Visitor-Id':
+            identificador
         },
+
         cache: 'no-store'
       }
     );
@@ -856,23 +1161,21 @@ async function iniciarContadorPublico() {
       );
     }
 
-    // SI POST DEVUELVE ESTADÍSTICAS
-    // VÁLIDAS, LAS MOSTRAMOS TAMBIÉN.
-    // SI NO LAS DEVUELVE, NO INTERRUMPIMOS
-    // LA CONSULTA GET POSTERIOR.
-
     try {
-      const datos = await respuesta.json();
+      const datos =
+        await respuesta.json();
 
       if (
         datos &&
         typeof datos.visitas === 'number' &&
         typeof datos.visitantes === 'number'
       ) {
-        mostrarCifrasContador(datos);
+        mostrarCifrasContador(
+          datos
+        );
       }
 
-    } catch (errorDatos) {
+    } catch {
       console.info(
         'Registro realizado; consultaremos las estadísticas por GET.'
       );
@@ -885,14 +1188,12 @@ async function iniciarContadorPublico() {
     );
   }
 
-  // ESTA CONSULTA SE REALIZA SIEMPRE,
-  // TANTO SI POST FUNCIONÓ COMO SI FALLÓ.
-  // GET SOLO CONSULTA LOS VALORES EXISTENTES.
-
   await consultarEstadisticasPublicas();
 }
 
-// INICIAR EL CONTADOR UNA SOLA VEZ
+// ========================================
+// INICIAR CONTADOR UNA SOLA VEZ
+// ========================================
 
 iniciarContadorPublico();
 
@@ -900,14 +1201,21 @@ iniciarContadorPublico();
 ==============================================
 FIN DE APP.JS
 
-ESTADÍSTICAS:
-stats-visits = visitas totales
-stats-unique = visitantes únicos estimados
+SELECTOR:
+Español → Totonaco
+Totonaco → Español
 
-POST: registra la visita.
-GET: consulta las cifras.
+BÚSQUEDA:
+Filtrado según columna seleccionada.
 
-NO SE MODIFICA EL WORKER.
-NO SE MODIFICA LA BASE DE TRADUCCIONES.
+CONTADOR:
+POST registra visita.
+GET consulta estadísticas.
+
+BASE D1:
+Sin modificaciones.
+
+WORKER:
+Sin modificaciones.
 ==============================================
 */
