@@ -3,99 +3,484 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#14212b">
-  <meta name="description" content="Diccionario Español–Totonaco y Totonaco–Español del Telebachillerato Polutla">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta name="theme-color" content="#f47721">
+
+  <meta name="description"
+        content="Traductor Totonaco–Español del Telebachillerato Polutla, Papantla, Veracruz. Proyecto escolar para preservar y difundir nuestra lengua.">
 
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
 
-  <title>Diccionario Español–Totonaco | Telebachillerato Polutla</title>
+  <title>Traductor Totonaco–Español | Telebachillerato Polutla</title>
 </head>
 
 <body>
+
   <main>
 
+    <!-- PÁGINA PRINCIPAL -->
+
     <section class="hero" id="inicio">
-      <div class="shade">
 
-        <div class="brand">
-          TELEBACHILLERATO POLUTLA
-          <span>• Proyecto comunitario</span>
-        </div>
+      <!-- FOTOGRAFÍA ORIGINAL DEL PLANTEL -->
 
-        <h1>
-          Traductor<br>
-          Totonaco – Español<br>
-          <em>Español – Totonaco</em>
-        </h1>
+      <div class="photo-banner">
 
-        <p class="intro">
-          Busca palabras en cualquiera de los dos idiomas
-          y descubre su traducción.
-        </p>
+        <header class="site-header">
 
-        <div class="search">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m16.5 16.5 5 5"/>
-          </svg>
+          <div class="school-logo"
+               aria-label="Telebachillerato de Veracruz">
 
-          <input
-            id="q"
-            autocomplete="off"
-            spellcheck="false"
-            placeholder="Escribe una palabra…"
-            aria-label="Buscar palabra"
-          >
+            <span class="logo-name">TEBAEV</span>
+            <span class="logo-symbol"
+                  aria-hidden="true">
+              <span></span>
+            </span>
+            <span class="logo-caption">
+              Telebachillerato<br>de Veracruz
+            </span>
 
-          <button id="buscar" type="button">
-            Buscar
-          </button>
+          </div>
 
-          <button
-            id="clear"
-            type="button"
-            aria-label="Borrar búsqueda"
-          >
-            ×
-          </button>
-        </div>
+          <div class="header-divider"
+               aria-hidden="true"></div>
 
-        <div id="results" class="results" aria-live="polite">
-          <p class="hint">
-            Escribe una palabra para ver su traducción.
-          </p>
-        </div>
+          <div class="brand">
+            <strong>TELEBACHILLERATO<br>POLUTLA</strong>
+            <span>PROYECTO ESCOLAR</span>
+          </div>
 
-        <p class="help">
-          ¿No encontraste una palabra?
-        </p>
+          <a class="menu-shortcut"
+             href="#acciones"
+             aria-label="Ir al menú del traductor">
+            <span></span>
+            <span></span>
+            <span></span>
+          </a>
 
-        <a class="add" href="#proponer">
-          Proponer una palabra
-        </a>
+        </header>
 
       </div>
+
+      <!-- CONTENIDO PRINCIPAL -->
+
+      <div class="main-panel">
+
+        <!-- ORNAMENTO CULTURAL -->
+        <!-- Representación gráfica provisional -->
+        <!-- inspirada en el penacho de Papantla -->
+
+        <div class="cultural-header"
+             aria-hidden="true">
+
+          <svg class="penacho"
+               viewBox="0 0 260 170"
+               xmlns="http://www.w3.org/2000/svg">
+
+            <g fill="none" stroke-linecap="round">
+
+              <path d="M35 116 A95 95 0 0 1 225 116"
+                    stroke="#303b34"
+                    stroke-width="5"/>
+
+              <path d="M43 116 A87 87 0 0 1 217 116"
+                    stroke="#c83239"
+                    stroke-width="10"
+                    stroke-dasharray="10 3"/>
+
+              <path d="M53 116 A77 77 0 0 1 207 116"
+                    stroke="#259bc0"
+                    stroke-width="9"/>
+
+              <path d="M64 116 A66 66 0 0 1 196 116"
+                    stroke="#e4bd3b"
+                    stroke-width="9"/>
+
+              <path d="M75 116 A55 55 0 0 1 185 116"
+                    stroke="#b82e35"
+                    stroke-width="9"
+                    stroke-dasharray="7 3"/>
+
+              <path d="M85 116 A45 45 0 0 1 175 116"
+                    stroke="#368052"
+                    stroke-width="8"/>
+
+              <path d="M95 116 A35 35 0 0 1 165 116"
+                    stroke="#e7c845"
+                    stroke-width="8"/>
+
+              <path d="M104 116 A26 26 0 0 1 156 116"
+                    stroke="#333333"
+                    stroke-width="8"/>
+
+            </g>
+
+            <circle cx="130" cy="116" r="15"
+                    fill="#a8deef"
+                    stroke="#333"
+                    stroke-width="5"/>
+
+            <path d="M130 130 L130 151"
+                  stroke="#333"
+                  stroke-width="8"/>
+
+            <path d="M130 145 L101 169 L159 169 Z"
+                  fill="#333"/>
+
+            <path d="M103 130 L75 168 H120 Z"
+                  fill="#fffdf7"/>
+
+            <path d="M157 130 L185 168 H140 Z"
+                  fill="#fffdf7"/>
+
+          </svg>
+
+          <!-- GUIAS DE VAINILLA -->
+
+          <svg class="vanilla-vine"
+               viewBox="0 0 320 110"
+               xmlns="http://www.w3.org/2000/svg">
+
+            <g fill="none"
+               stroke="#397c39"
+               stroke-width="4"
+               stroke-linecap="round">
+              <path d="M160 38 C115 38 93 90 16 60"/>
+              <path d="M160 38 C205 38 227 90 304 60"/>
+            </g>
+
+            <g fill="#76b84b"
+               stroke="#397c39"
+               stroke-width="2">
+
+              <ellipse cx="63" cy="52" rx="24" ry="10"
+                       transform="rotate(-24 63 52)"/>
+
+              <ellipse cx="95" cy="75" rx="22" ry="9"
+                       transform="rotate(40 95 75)"/>
+
+              <ellipse cx="257" cy="52" rx="24" ry="10"
+                       transform="rotate(24 257 52)"/>
+
+              <ellipse cx="225" cy="75" rx="22" ry="9"
+                       transform="rotate(-40 225 75)"/>
+
+            </g>
+
+            <g fill="#fff9df"
+               stroke="#e7ca8c"
+               stroke-width="1.5">
+
+              <g transform="translate(35 75)">
+                <ellipse cy="-12" rx="7" ry="13"/>
+                <ellipse cx="11" cy="-3" rx="7" ry="13"
+                         transform="rotate(72 11 -3)"/>
+                <ellipse cx="7" cy="10" rx="7" ry="13"
+                         transform="rotate(144 7 10)"/>
+                <ellipse cx="-7" cy="10" rx="7" ry="13"
+                         transform="rotate(216 -7 10)"/>
+                <ellipse cx="-11" cy="-3" rx="7" ry="13"
+                         transform="rotate(288 -11 -3)"/>
+                <circle r="5" fill="#e6a529"/>
+              </g>
+
+              <g transform="translate(285 75)">
+                <ellipse cy="-12" rx="7" ry="13"/>
+                <ellipse cx="11" cy="-3" rx="7" ry="13"
+                         transform="rotate(72 11 -3)"/>
+                <ellipse cx="7" cy="10" rx="7" ry="13"
+                         transform="rotate(144 7 10)"/>
+                <ellipse cx="-7" cy="10" rx="7" ry="13"
+                         transform="rotate(216 -7 10)"/>
+                <ellipse cx="-11" cy="-3" rx="7" ry="13"
+                         transform="rotate(288 -11 -3)"/>
+                <circle r="5" fill="#e6a529"/>
+              </g>
+
+            </g>
+
+          </svg>
+
+        </div>
+
+        <!-- TÍTULO -->
+
+        <div class="hero-content">
+
+          <h1>
+            <span class="title-top">Traductor</span>
+            <span class="title-bottom">
+              Totonaco–Español
+            </span>
+          </h1>
+
+          <p class="project-label">
+            PROYECTO ESCOLAR
+          </p>
+
+          <p class="intro">
+            Busca palabras en español o totonaco
+            y descubre su traducción.
+          </p>
+
+        </div>
+
+        <!-- BUSCADOR ORIGINAL -->
+        <!-- Conservamos sus identificadores -->
+
+        <div class="translator-content"
+             id="buscador">
+
+          <div class="search">
+
+            <svg viewBox="0 0 24 24"
+                 aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="m16.5 16.5 5 5"/>
+            </svg>
+
+            <input
+              id="q"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="100"
+              placeholder="Escribe una palabra..."
+              aria-label="Buscar palabra en español o totonaco"
+            >
+
+            <button id="buscar"
+                    type="button">
+              Buscar
+            </button>
+
+            <button id="clear"
+                    type="button"
+                    aria-label="Borrar búsqueda">
+              ×
+            </button>
+
+          </div>
+
+          <!-- RESULTADOS -->
+
+          <div id="results"
+               class="results"
+               aria-live="polite">
+
+            <p class="hint">
+              Escribe una palabra para ver
+              su traducción.
+            </p>
+
+          </div>
+
+        </div>
+
+        <!-- BOTONES PRINCIPALES -->
+
+        <nav class="quick-actions"
+             id="acciones"
+             aria-label="Opciones del traductor">
+
+          <a class="action-card"
+             href="#buscador">
+
+            <span class="action-icon"
+                  aria-hidden="true">📖</span>
+
+            <span>Consultar<br>palabras</span>
+
+          </a>
+
+          <!-- Esta clase add es necesaria -->
+          <!-- para el app.js existente -->
+
+          <a class="action-card add"
+             href="#proponer">
+
+            <span class="action-icon"
+                  aria-hidden="true">✚</span>
+
+            <span>Proponer<br>una palabra</span>
+
+          </a>
+
+          <a class="action-card"
+             href="#acerca">
+
+            <span class="action-icon"
+                  aria-hidden="true">✦</span>
+
+            <span>Acerca del<br>proyecto</span>
+
+          </a>
+
+          <a class="action-card"
+             href="#compartir">
+
+            <span class="action-icon"
+                  aria-hidden="true">▦</span>
+
+            <span>Código QR<br>para compartir</span>
+
+          </a>
+
+        </nav>
+
+        <!-- PALABRA DESTACADA -->
+
+        <section class="word-of-day"
+                 aria-label="Palabra destacada">
+
+          <div class="flower-symbol"
+               aria-hidden="true">
+            ✿
+          </div>
+
+          <div class="word-content">
+
+            <span class="word-label">
+              Palabra destacada
+            </span>
+
+            <strong>Paxni</strong>
+
+            <span class="word-translation">
+              Puerco
+            </span>
+
+          </div>
+
+        </section>
+
+        <!-- TRADUCCIONES DISPONIBLES -->
+
+        <section class="statistics"
+                 aria-label="Estadísticas del traductor">
+
+          <div class="stat-item">
+
+            <span class="stat-icon"
+                  aria-hidden="true">📖</span>
+
+            <strong id="count">—</strong>
+
+            <span>
+              Traducciones disponibles
+            </span>
+
+          </div>
+
+        </section>
+
+        <!-- ACERCA DEL PROYECTO -->
+
+        <section class="about-project"
+                 id="acerca">
+
+          <h2>Acerca del proyecto</h2>
+
+          <p>
+            El Traductor Totonaco–Español
+            es un proyecto escolar del
+            Telebachillerato Polutla,
+            municipio de Papantla, Veracruz.
+          </p>
+
+          <p>
+            Nuestro propósito es contribuir
+            a la preservación, difusión
+            y valoración de la lengua
+            totonaca mediante una herramienta
+            digital gratuita y accesible.
+          </p>
+
+          <p>
+            Puedes consultar palabras en ambos
+            idiomas y enviar nuevas propuestas
+            que serán revisadas antes de
+            incorporarse al diccionario.
+          </p>
+
+        </section>
+
+        <!-- COMPARTIR -->
+
+        <section class="share-project"
+                 id="compartir">
+
+          <h2>Comparte nuestro traductor</h2>
+
+          <p>
+            Escanea el código QR para acceder
+            a nuestro proyecto escolar.
+          </p>
+
+          <div class="qr-container">
+
+            <img
+              class="project-qr"
+              src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&amp;data=https%3A%2F%2Fwww.tebaevpolutladiccionario.org%2F"
+              alt="Código QR del Traductor Totonaco–Español"
+              width="220"
+              height="220"
+              loading="lazy"
+            >
+
+          </div>
+
+          <a class="share-link"
+             href="https://www.tebaevpolutladiccionario.org/">
+            www.tebaevpolutladiccionario.org
+          </a>
+
+        </section>
+
+      </div>
+
     </section>
 
-    <section class="proposal" id="proponer" hidden>
+    <!-- FORMULARIO ORIGINAL -->
+    <!-- Conserva integración con Turnstile -->
 
-      <a href="#inicio" class="back">
+    <section class="proposal"
+             id="proponer"
+             hidden>
+
+      <a href="#inicio"
+         class="back">
         ← Volver al traductor
       </a>
 
-      <h2>Proponer una palabra</h2>
+      <div class="proposal-heading">
 
-      <p>
-        Ayúdanos a enriquecer el Diccionario Español–Totonaco.
-        Comparte una palabra y su traducción.
-        Todas las propuestas serán revisadas antes de publicarse.
-      </p>
+        <span class="proposal-eyebrow">
+          TELEBACHILLERATO POLUTLA
+        </span>
+
+        <h2>Proponer una palabra</h2>
+
+        <p>
+          Ayúdanos a enriquecer el
+          Traductor Totonaco–Español.
+          Comparte una palabra y su traducción.
+        </p>
+
+        <p>
+          Todas las propuestas serán revisadas
+          antes de publicarse.
+        </p>
+
+      </div>
 
       <form id="proposalForm">
 
         <label for="es">Español</label>
+
         <input
           id="es"
           name="espanol"
@@ -106,6 +491,7 @@
         >
 
         <label for="to">Totonaco</label>
+
         <input
           id="to"
           name="totonaco"
@@ -127,7 +513,8 @@
           placeholder="Ej. Polutla"
         >
 
-        <!-- Turnstile se incorpora mediante app.js -->
+        <!-- Cloudflare Turnstile -->
+        <!-- se incorpora mediante app.js -->
 
         <button type="submit">
           Enviar propuesta
@@ -135,29 +522,51 @@
 
         <small>
           Tu propuesta se enviará para revisión.
-          No aparecerá en el diccionario hasta que
-          sea aprobada por el administrador.
-          Puedes enviar hasta 10 propuestas cada 24 horas,
-          esperando al menos 60 segundos entre envíos.
+          No aparecerá en el diccionario
+          hasta que sea aprobada por el
+          administrador.
+
+          Puedes enviar hasta 10 propuestas
+          cada 24 horas, esperando al menos
+          60 segundos entre envíos.
         </small>
 
-        <p
-          id="formStatus"
-          role="status"
-          aria-live="polite"
-        ></p>
+        <p id="formStatus"
+           role="status"
+           aria-live="polite">
+        </p>
 
       </form>
+
     </section>
 
   </main>
 
-  <footer>
-    <span id="count"></span>
-    traducciones disponibles
-    · Telebachillerato Polutla
-    · Proyecto comunitario
+  <!-- CONTADOR DE VISITAS -->
+  <!-- app.js lo inserta automáticamente -->
+  <!-- antes del footer -->
+
+  <footer class="site-footer">
+
+    <strong>
+      Telebachillerato Polutla
+    </strong>
+
+    <span>
+      PROYECTO ESCOLAR
+    </span>
+
+    <p>
+      NUESTRA LENGUA, NUESTRA IDENTIDAD
+    </p>
+
+    <small>
+      Papantla, Veracruz, México
+    </small>
+
   </footer>
+
+  <!-- JAVASCRIPT ORIGINAL -->
 
   <script src="app.js" defer></script>
 
