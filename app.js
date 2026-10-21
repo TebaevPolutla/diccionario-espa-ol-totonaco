@@ -17,6 +17,7 @@ const API_URL =
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAAFeOoR4lrHD_E-5o';
 const PROPOSAL_ENDPOINT = API_URL + 'api/propuestas';
+const COUNTER_ENDPOINT = API_URL + 'api/contador';
 
 const $ = id => document.getElementById(id);
 
@@ -489,3 +490,204 @@ if (pantallaTraductor && pantallaFormulario) {
     cambiarPantalla(false);
   });
 }
+
+// ========================================
+// CONTADOR PUBLICO DE VISITAS
+// ========================================
+
+function obtenerIdentificadorVisitante() {
+  const clave = 'diccionario-visitante-id-v1';
+  const patron =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  try {
+    let identificador = localStorage.getItem(clave);
+
+    if (!identificador || !patron.test(identificador)) {
+      identificador = crypto.randomUUID();
+      localStorage.setItem(clave, identificador);
+    }
+
+    return identificador;
+  } catch (error) {
+    // En navegadores con almacenamiento restringido,
+    // usamos un identificador temporal de esta sesión.
+    if (!window.__diccionarioVisitanteTemporal) {
+      window.__diccionarioVisitanteTemporal =
+        crypto.randomUUID();
+    }
+
+    return window.__diccionarioVisitanteTemporal;
+  }
+}
+
+function crearContadorVisible() {
+  if (document.getElementById('contador-visitas')) {
+    return;
+  }
+
+  const seccion = document.createElement('section');
+  seccion.id = 'contador-visitas';
+
+  Object.assign(seccion.style, {
+    boxSizing: 'border-box',
+    width: '100%',
+    maxWidth: '700px',
+    margin: '30px auto',
+    padding: '20px 16px',
+    background: '#f3f7f5',
+    color: '#174a38',
+    border: '1px solid #d7e7df',
+    borderRadius: '14px',
+    textAlign: 'center',
+    fontFamily: 'inherit',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+  });
+
+  const titulo = document.createElement('h2');
+  titulo.textContent = 'Visitas al diccionario';
+
+  Object.assign(titulo.style, {
+    fontSize: '19px',
+    margin: '0 0 16px',
+    color: '#174a38'
+  });
+
+  const cifras = document.createElement('div');
+
+  Object.assign(cifras.style, {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '28px'
+  });
+
+  function crearDato(etiqueta, identificador) {
+    const bloque = document.createElement('div');
+
+    const numero = document.createElement('strong');
+    numero.id = identificador;
+    numero.textContent = '—';
+
+    Object.assign(numero.style, {
+      display: 'block',
+      fontSize: '32px',
+      lineHeight: '1.2',
+      color: '#146c4a'
+    });
+
+    const texto = document.createElement('span');
+    texto.textContent = etiqueta;
+
+    Object.assign(texto.style, {
+      display: 'block',
+      marginTop: '6px',
+      fontSize: '14px',
+      color: '#3f554b'
+    });
+
+    bloque.append(numero, texto);
+    return bloque;
+  }
+
+  cifras.append(
+    crearDato('Visitas totales', 'contador-total-visitas'),
+    crearDato('Visitantes únicos estimados', 'contador-unicos')
+  );
+
+  const nota = document.createElement('small');
+  nota.textContent =
+    'Estadísticas registradas desde la activación del contador.';
+
+  Object.assign(nota.style, {
+    display: 'block',
+    marginTop: '15px',
+    color: '#64786c',
+    fontSize: '12px'
+  });
+
+  seccion.append(titulo, cifras, nota);
+
+  const pie = document.querySelector('footer');
+
+  if (pie && pie.parentNode) {
+    pie.parentNode.insertBefore(seccion, pie);
+  } else {
+    document.body.appendChild(seccion);
+  }
+}
+
+function mostrarCifrasContador(datos) {
+  if (
+    !datos ||
+    typeof datos.visitas !== 'number' ||
+    typeof datos.visitantes !== 'number'
+  ) {
+    return;
+  }
+
+  const formato = new Intl.NumberFormat('es-MX');
+
+  const visitas = $('contador-total-visitas');
+  const visitantes = $('contador-unicos');
+
+  if (visitas) {
+    visitas.textContent = formato.format(datos.visitas);
+  }
+
+  if (visitantes) {
+    visitantes.textContent = formato.format(datos.visitantes);
+  }
+}
+
+async function iniciarContadorPublico() {
+  crearContadorVisible();
+
+  try {
+    const identificador = obtenerIdentificadorVisitante();
+
+    const respuesta = await fetch(COUNTER_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'X-Visitor-Id': identificador
+      },
+      cache: 'no-store'
+    });
+
+    if (!respuesta.ok) {
+      throw new Error('HTTP ' + respuesta.status);
+    }
+
+    const datos = await respuesta.json();
+
+    mostrarCifrasContador(datos);
+
+  } catch (error) {
+    console.warn(
+      'No se pudo registrar la visita:',
+      error
+    );
+
+    // Si falla el registro, intentamos mostrar
+    // los datos existentes sin modificar el contador.
+    try {
+      const respuesta = await fetch(COUNTER_ENDPOINT, {
+        method: 'GET',
+        cache: 'no-store'
+      });
+
+      if (respuesta.ok) {
+        const datos = await respuesta.json();
+        mostrarCifrasContador(datos);
+      }
+    } catch (errorConsulta) {
+      console.warn(
+        'Contador no disponible:',
+        errorConsulta
+      );
+    }
+  }
+}
+
+iniciarContadorPublico();
