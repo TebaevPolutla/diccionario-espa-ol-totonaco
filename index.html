@@ -4,162 +4,408 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#14212b">
-  <meta name="description" content="Diccionario Español–Totonaco y Totonaco–Español del Telebachillerato Polutla">
-
-  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#ed7018">
+  <meta name="description" content="Traductor Totonaco–Español del Telebachillerato Polutla, Papantla, Veracruz.">
+  <title>Traductor Totonaco–Español | Telebachillerato Polutla</title>
   <link rel="stylesheet" href="style.css">
-
-  <title>Diccionario Español–Totonaco | Telebachillerato Polutla</title>
 </head>
 
 <body>
-  <main>
+<main>
 
-    <section class="hero" id="inicio">
-      <div class="shade">
+  <section class="hero" id="inicio">
+    <div class="hero-photo" aria-hidden="true"></div>
 
-        <div class="brand">
-          TELEBACHILLERATO POLUTLA
-          <span>• Proyecto comunitario</span>
+    <header class="site-header">
+      <div class="school-lockup">
+        <img
+          src="assets/logo-tebaev.png"
+          class="tebaev-logo"
+          alt="Logotipo del Telebachillerato de Veracruz"
+        >
+
+        <div class="header-divider"></div>
+
+        <div class="school-name">
+          <strong>TELEBACHILLERATO<br>POLUTLA</strong>
+          <span>PROYECTO ESCOLAR</span>
         </div>
+      </div>
 
+      <details class="menu" id="siteMenu">
+        <summary aria-label="Abrir menú">
+          <span></span><span></span><span></span>
+        </summary>
+        <nav aria-label="Menú principal">
+          <a href="#buscador-seccion">Buscar traducciones</a>
+          <a href="#acerca" data-panel="acerca">Acerca del proyecto</a>
+          <a href="#compartir" data-panel="compartir">Compartir mediante QR</a>
+        </nav>
+      </details>
+    </header>
+
+    <div class="photo-spacer" aria-hidden="true"></div>
+
+    <div class="cream-panel">
+
+      <div class="ornament" aria-hidden="true">
+        <img
+          src="assets/penacho-papantla.png"
+          class="penacho"
+          alt=""
+        >
+      </div>
+
+      <div class="heading">
         <h1>
-          Traductor<br>
-          Totonaco – Español<br>
-          <em>Español – Totonaco</em>
+          <span>Traductor</span>
+          <strong>Totonaco–Español</strong>
         </h1>
 
+        <div class="small-rule"></div>
+        <p class="project-caption">PROYECTO ESCOLAR</p>
+
         <p class="intro">
-          Busca palabras en cualquiera de los dos idiomas
+          Busca palabras en español o totonaco
           y descubre su traducción.
         </p>
+      </div>
 
-        <div class="search">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m16.5 16.5 5 5"/>
+      <div class="search" id="buscador-seccion">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="7"></circle>
+          <path d="m16 16 6 6"></path>
+        </svg>
+
+        <input
+          id="q"
+          type="search"
+          maxlength="100"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Escribe una palabra..."
+          aria-label="Buscar en español o totonaco"
+        >
+
+        <button id="clear" type="button" aria-label="Borrar búsqueda">×</button>
+        <button id="buscar" type="button">Buscar</button>
+      </div>
+
+      <!-- TRES TARJETAS, SIN REPETIR EL BUSCADOR -->
+      <nav class="quick-actions" aria-label="Opciones del proyecto">
+
+        <!-- APP.JS NECESITA ESTE ENLACE -->
+        <a class="action" href="#proponer">
+          <svg class="action-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="21" fill="currentColor"/>
+            <path
+              d="M24 13V35M13 24H35"
+              stroke="#fff"
+              stroke-width="3.8"
+              stroke-linecap="round"
+            />
           </svg>
-
-          <input
-            id="q"
-            autocomplete="off"
-            spellcheck="false"
-            placeholder="Escribe una palabra…"
-            aria-label="Buscar palabra"
-          >
-
-          <button id="buscar" type="button">
-            Buscar
-          </button>
-
-          <button
-            id="clear"
-            type="button"
-            aria-label="Borrar búsqueda"
-          >
-            ×
-          </button>
-        </div>
-
-        <div id="results" class="results" aria-live="polite">
-          <p class="hint">
-            Escribe una palabra para ver su traducción.
-          </p>
-        </div>
-
-        <p class="help">
-          ¿No encontraste una palabra?
-        </p>
-
-        <a class="add" href="#proponer">
-          Proponer una palabra
+          <span>Proponer<br>una palabra</span>
         </a>
 
-      </div>
-    </section>
+        <a class="action" href="#acerca" data-panel="acerca">
+          <svg class="action-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="13" r="7" fill="currentColor"/>
+            <circle cx="9" cy="19" r="5.5" fill="currentColor"/>
+            <circle cx="39" cy="19" r="5.5" fill="currentColor"/>
+            <path d="M11 41V36C11 29 16 25 24 25S37 29 37 36V41Z" fill="currentColor"/>
+            <path d="M3 40V33C3 29 5 26 11 26M45 40V33C45 29 43 26 37 26"
+              stroke="currentColor" stroke-width="4" fill="none"/>
+          </svg>
+          <span>Acerca del<br>proyecto</span>
+        </a>
 
-    <section class="proposal" id="proponer" hidden>
+        <a class="action" href="#compartir" data-panel="compartir">
+          <svg class="action-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="4">
+              <path d="M5 18V5H18M30 5H43V18M5 30V43H18M30 43H43V30"/>
+              <rect x="12" y="12" width="9" height="9"/>
+              <rect x="27" y="12" width="9" height="9"/>
+              <rect x="12" y="27" width="9" height="9"/>
+              <path d="M27 27H35V35H43M29 43V37"/>
+            </g>
+          </svg>
+          <span>Código QR<br>para compartir</span>
+        </a>
 
-      <a href="#inicio" class="back">
-        ← Volver al traductor
-      </a>
+      </nav>
 
-      <h2>Proponer una palabra</h2>
+      <!-- APP.JS CONTROLA LOS RESULTADOS -->
+      <section class="results-card" id="resultsCard" hidden aria-label="Resultados">
+        <div id="results" class="results" aria-live="polite">
+          <p class="hint">Escribe una palabra para ver su traducción.</p>
+        </div>
+      </section>
 
-      <p>
-        Ayúdanos a enriquecer el Diccionario Español–Totonaco.
-        Comparte una palabra y su traducción.
-        Todas las propuestas serán revisadas antes de publicarse.
-      </p>
+      <section class="word-card" aria-label="Palabra destacada">
+        <div class="word-details">
+          <span>Palabra destacada</span>
+          <strong>Paxni</strong>
+          <small>Puerco</small>
+        </div>
+      </section>
 
-      <form id="proposalForm">
+      <section class="stats-block" aria-label="Estadísticas del diccionario">
 
-        <label for="es">Español</label>
-        <input
-          id="es"
-          name="espanol"
-          type="text"
-          required
-          maxlength="100"
-          placeholder="Ej. Casa"
-        >
+        <div class="stat">
+          <svg class="stat-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M24 12C18 8 9 7 4 10V37C11 34 19 35 24 40V12Z"
+              fill="currentColor"/>
+            <path d="M24 12C30 8 39 7 44 10V37C37 34 29 35 24 40V12Z"
+              fill="currentColor"/>
+          </svg>
+          <strong id="count">—</strong>
+          <span>Traducciones<br>disponibles</span>
+        </div>
 
-        <label for="to">Totonaco</label>
-        <input
-          id="to"
-          name="totonaco"
-          type="text"
-          required
-          maxlength="100"
-          placeholder="Escribe la traducción"
-        >
+        <div class="stat">
+          <svg class="stat-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <rect x="6" y="28" width="9" height="13" rx="2" fill="currentColor"/>
+            <rect x="20" y="18" width="9" height="23" rx="2" fill="currentColor"/>
+            <rect x="34" y="7" width="9" height="34" rx="2" fill="currentColor"/>
+          </svg>
+          <strong id="stats-visits">—</strong>
+          <span>Visitas<br>totales</span>
+        </div>
 
-        <label for="community">
-          Comunidad o variante (opcional)
-        </label>
+        <div class="stat">
+          <svg class="stat-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="13" r="7" fill="currentColor"/>
+            <circle cx="9" cy="20" r="5" fill="currentColor"/>
+            <circle cx="39" cy="20" r="5" fill="currentColor"/>
+            <path d="M9 41V35C9 28 15 25 24 25S39 28 39 35V41Z"
+              fill="currentColor"/>
+          </svg>
+          <strong id="stats-unique">—</strong>
+          <span>Visitantes únicos<br>estimados</span>
+        </div>
 
-        <input
-          id="community"
-          name="comunidad"
-          type="text"
-          maxlength="140"
-          placeholder="Ej. Polutla"
-        >
+      </section>
 
-        <!-- Turnstile se incorpora mediante app.js -->
+    </div>
+  </section>
 
-        <button type="submit">
-          Enviar propuesta
-        </button>
+  <!-- FORMULARIO ORIGINAL -->
+  <section class="proposal" id="proponer" hidden>
+    <a href="#inicio" class="back">← Volver al traductor</a>
 
-        <small>
-          Tu propuesta se enviará para revisión.
-          No aparecerá en el diccionario hasta que
-          sea aprobada por el administrador.
-          Puedes enviar hasta 10 propuestas cada 24 horas,
-          esperando al menos 60 segundos entre envíos.
-        </small>
+    <h2>Proponer una palabra</h2>
 
-        <p
-          id="formStatus"
-          role="status"
-          aria-live="polite"
-        ></p>
+    <p>
+      Ayúdanos a enriquecer el Traductor Totonaco–Español.
+      Todas las propuestas serán revisadas antes de publicarse.
+    </p>
 
-      </form>
-    </section>
+    <form id="proposalForm">
+      <label for="es">Español</label>
+      <input
+        id="es"
+        name="espanol"
+        type="text"
+        required
+        maxlength="100"
+        placeholder="Ej. Casa"
+      >
 
-  </main>
+      <label for="to">Totonaco</label>
+      <input
+        id="to"
+        name="totonaco"
+        type="text"
+        required
+        maxlength="100"
+        placeholder="Escribe la traducción"
+      >
 
-  <footer>
-    <span id="count"></span>
-    traducciones disponibles
-    · Telebachillerato Polutla
-    · Proyecto comunitario
-  </footer>
+      <label for="community">Comunidad o variante (opcional)</label>
+      <input
+        id="community"
+        name="comunidad"
+        type="text"
+        maxlength="140"
+        placeholder="Ej. Polutla"
+      >
 
-  <script src="app.js" defer></script>
+      <!-- Turnstile se incorpora mediante app.js -->
+      <button type="submit">Enviar propuesta</button>
+
+      <small>
+        Tu propuesta se enviará para revisión.
+        No aparecerá hasta ser aprobada por el administrador.
+        Puedes enviar hasta 10 propuestas cada 24 horas,
+        esperando al menos 60 segundos entre envíos.
+      </small>
+
+      <p id="formStatus" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+</main>
+
+<!-- INFORMACIÓN SOLO CUANDO SE SOLICITA -->
+<dialog id="acerca" class="info-dialog">
+  <button type="button" class="dialog-close"
+    data-close aria-label="Cerrar">×</button>
+
+  <h2>Nuestra lengua, nuestra identidad</h2>
+
+  <p>
+    El Traductor Totonaco–Español es un proyecto escolar
+    del Telebachillerato Polutla, Papantla, Veracruz.
+  </p>
+
+  <p>
+    Su propósito es contribuir a la preservación,
+    aprendizaje y difusión de la lengua totonaca
+    mediante una herramienta digital gratuita.
+  </p>
+</dialog>
+
+<!-- QR SOLO CUANDO SE SOLICITA -->
+<dialog id="compartir" class="info-dialog qr-dialog">
+  <button type="button" class="dialog-close"
+    data-close aria-label="Cerrar">×</button>
+
+  <h2>Comparte nuestro traductor</h2>
+  <p>
+    Escanea este código con otro dispositivo
+    para visitar la página oficial.
+  </p>
+
+  <img
+    src="assets/codigo-qr.png"
+    width="190"
+    height="190"
+    alt="Código QR del traductor"
+  >
+
+  <a
+    class="share-link"
+    href="https://www.tebaevpolutladiccionario.org/"
+    target="_blank"
+    rel="noopener noreferrer"
+  >Abrir página oficial</a>
+</dialog>
+
+<footer class="site-footer">
+  <strong>Telebachillerato Polutla</strong>
+  <span>PROYECTO ESCOLAR</span>
+  <p>NUESTRA LENGUA, NUESTRA IDENTIDAD</p>
+</footer>
+
+<script src="app.js" defer></script>
+
+<!-- SOLO PRESENTACIÓN: NO MODIFICA LA API -->
+<script>
+(function () {
+  "use strict";
+
+  // Ventanas informativas.
+  const dialogs = {
+    acerca: document.getElementById("acerca"),
+    compartir: document.getElementById("compartir")
+  };
+
+  document.querySelectorAll("[data-panel]").forEach(link => {
+    link.addEventListener("click", event => {
+      event.preventDefault();
+      const dialog = dialogs[link.dataset.panel];
+
+      if (dialog && !dialog.open) {
+        dialog.showModal();
+      }
+
+      const menu = document.getElementById("siteMenu");
+      if (menu) menu.open = false;
+    });
+  });
+
+  document.querySelectorAll("[data-close]").forEach(button => {
+    button.addEventListener("click", () => {
+      button.closest("dialog")?.close();
+    });
+  });
+
+  Object.values(dialogs).forEach(dialog => {
+    if (!dialog) return;
+
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+  });
+
+  // Resultados: ocultos mientras no haya una búsqueda.
+  const resultCard = document.getElementById("resultsCard");
+  const resultArea = document.getElementById("results");
+
+  const initialMessages = new Set([
+    "Escribe una palabra para ver su traducción.",
+    "Presiona Buscar para ver la traducción."
+  ]);
+
+  function syncResults() {
+    if (!resultCard || !resultArea) return;
+
+    const message = resultArea.textContent.trim();
+    resultCard.hidden =
+      !message || initialMessages.has(message);
+  }
+
+  if (resultArea) {
+    new MutationObserver(syncResults).observe(resultArea, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+    syncResults();
+  }
+
+  // Sincronización de estadísticas existentes.
+  // No genera consultas ni registros adicionales.
+  const counter = document.getElementById("contador-visitas");
+
+  function syncCounters() {
+    const pairs = [
+      ["contador-total-visitas", "stats-visits"],
+      ["contador-unicos", "stats-unique"]
+    ];
+
+    for (const [source, target] of pairs) {
+      const a = document.getElementById(source);
+      const b = document.getElementById(target);
+      if (a && b) b.textContent = a.textContent;
+    }
+  }
+
+  let counterObserver = null;
+
+  function watchCounter() {
+    const original = document.getElementById("contador-visitas");
+    if (!original || counterObserver) return;
+
+    syncCounters();
+
+    counterObserver = new MutationObserver(syncCounters);
+    counterObserver.observe(original, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+
+  const bodyObserver = new MutationObserver(watchCounter);
+  bodyObserver.observe(document.body, {
+    childList: true
+  });
+
+  watchCounter();
+})();
+</script>
 
 </body>
 </html>

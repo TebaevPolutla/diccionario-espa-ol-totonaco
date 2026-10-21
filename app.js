@@ -1,5 +1,34 @@
 
+/*
+==============================================
+TRADUCTOR TOTONACO–ESPAÑOL
+TELEBACHILLERATO POLUTLA
+
+APP.JS COMPLETO
+CORRECCIÓN DEL CONTADOR PÚBLICO
+
+Conserva:
+- Búsqueda en Cloudflare D1
+- Búsqueda local de respaldo
+- Propuestas de palabras
+- Cloudflare Turnstile
+- Identificación original de visitantes
+- Registro de visitas en Cloudflare
+- Navegación entre traductor y formulario
+
+Corrección:
+- Registro de visita mediante POST
+- Consulta de estadísticas mediante GET
+- Actualización directa del nuevo diseño
+- Sin duplicar registros por consultas GET
+- Sin modificar la base de traducciones
+==============================================
+*/
+
+// ALTURA INICIAL
+
 const initialWidth = window.innerWidth;
+
 const initialHeight = Math.max(
   window.innerHeight,
   initialWidth <= 500 ? 750 : 700
@@ -12,12 +41,19 @@ document.documentElement.style.setProperty(
 
 'use strict';
 
+// CONFIGURACIÓN ORIGINAL
+
 const API_URL =
   'https://traductor-totonaco-api.eduardopereznani.workers.dev/';
 
-const TURNSTILE_SITE_KEY = '0x4AAAAAAFeOoR4lrHD_E-5o';
-const PROPOSAL_ENDPOINT = API_URL + 'api/propuestas';
-const COUNTER_ENDPOINT = API_URL + 'api/contador';
+const TURNSTILE_SITE_KEY =
+  '0x4AAAAAAFeOoR4lrHD_E-5o';
+
+const PROPOSAL_ENDPOINT =
+  API_URL + 'api/propuestas';
+
+const COUNTER_ENDPOINT =
+  API_URL + 'api/contador';
 
 const $ = id => document.getElementById(id);
 
@@ -32,6 +68,10 @@ let localReady = false;
 let requestNumber = 0;
 let searchTimer;
 
+// ========================================
+// PALABRAS APROBADAS LOCALMENTE
+// ========================================
+
 function approvedLocal() {
   try {
     const data = JSON.parse(
@@ -39,8 +79,13 @@ function approvedLocal() {
     );
 
     return Array.isArray(data)
-      ? data.filter(w => w && w.espanol && w.totonaco)
+      ? data.filter(w =>
+          w &&
+          w.espanol &&
+          w.totonaco
+        )
       : [];
+
   } catch {
     return [];
   }
@@ -59,7 +104,10 @@ function validWords(items) {
 }
 
 function matchLocal(query) {
-  const all = [...localWords, ...approvedLocal()];
+  const all = [
+    ...localWords,
+    ...approvedLocal()
+  ];
 
   const exact = all.filter(w =>
     normalize(w.espanol) === query ||
@@ -74,18 +122,29 @@ function matchLocal(query) {
       ).slice(0, 30);
 }
 
+// ========================================
+// RESULTADOS DEL TRADUCTOR
+// ========================================
+
 function showMessage(message) {
   const out = $('results');
+
+  if (!out) return;
+
   out.replaceChildren();
 
   const p = document.createElement('p');
   p.className = 'hint';
   p.textContent = message;
+
   out.appendChild(p);
 }
 
 function display(items, query) {
   const out = $('results');
+
+  if (!out) return;
+
   out.replaceChildren();
 
   if (!items.length) {
@@ -100,13 +159,16 @@ function display(items, query) {
     normalize(w.totonaco) === query
   );
 
-  const ordered = exact.length ? exact : items;
+  const ordered = exact.length
+    ? exact
+    : items;
 
   for (const w of ordered.slice(0, 30)) {
     const row = document.createElement('div');
     row.className = 'entry';
 
     const left = document.createElement('div');
+
     const right = document.createElement('div');
     right.className = 'translation';
 
@@ -118,13 +180,19 @@ function display(items, query) {
       normalize(w.totonaco).includes(query) &&
       !normalize(w.espanol).includes(query);
 
-    const first = totonac ? w.totonaco : w.espanol;
-    const second = totonac ? w.espanol : w.totonaco;
+    const first = totonac
+      ? w.totonaco
+      : w.espanol;
+
+    const second = totonac
+      ? w.espanol
+      : w.totonaco;
 
     const title = document.createElement('strong');
     title.textContent = first;
 
     const info = document.createElement('small');
+
     info.textContent = totonac
       ? 'Totonaco → Español'
       : spanish
@@ -132,18 +200,31 @@ function display(items, query) {
         : 'Español ↔ Totonaco';
 
     left.append(title, info);
+
     right.textContent = second;
+
     row.append(left, right);
+
     out.appendChild(row);
   }
 }
 
+// ========================================
+// BÚSQUEDA EN CLOUDFLARE D1
+// ========================================
+
 async function search() {
-  const query = normalize($('q').value);
+  const input = $('q');
+
+  if (!input) return;
+
+  const query = normalize(input.value);
   const current = ++requestNumber;
 
   if (!query) {
-    showMessage('Escribe una palabra para ver su traducción.');
+    showMessage(
+      'Escribe una palabra para ver su traducción.'
+    );
     return;
   }
 
@@ -152,11 +233,13 @@ async function search() {
   try {
     const response = await fetch(
       API_URL + '?palabra=' +
-      encodeURIComponent($('q').value.trim())
+      encodeURIComponent(input.value.trim())
     );
 
     if (!response.ok) {
-      throw new Error('HTTP ' + response.status);
+      throw new Error(
+        'HTTP ' + response.status
+      );
     }
 
     const data = await response.json();
@@ -180,8 +263,10 @@ async function search() {
         normalize(w.totonaco);
 
       if (seen.has(key)) return false;
+
       seen.add(key);
       return true;
+
     }).filter(w =>
       normalize(w.espanol).includes(query) ||
       normalize(w.totonaco).includes(query)
@@ -207,82 +292,141 @@ async function search() {
   }
 }
 
-$('q').addEventListener('input', () => {
+// ========================================
+// CONTROLES DEL BUSCADOR
+// ========================================
+
+$('q')?.addEventListener('input', () => {
   clearTimeout(searchTimer);
+
   ++requestNumber;
-  showMessage('Presiona Buscar para ver la traducción.');
+
+  showMessage(
+    'Presiona Buscar para ver la traducción.'
+  );
 });
 
-$('buscar').addEventListener('click', () => {
+$('buscar')?.addEventListener('click', () => {
   search();
 });
 
-$('q').addEventListener('keydown', evento => {
+$('q')?.addEventListener('keydown', evento => {
   if (evento.key === 'Enter') {
     evento.preventDefault();
     search();
   }
 });
 
-$('clear').addEventListener('click', () => {
+$('clear')?.addEventListener('click', () => {
   clearTimeout(searchTimer);
+
   $('q').value = '';
+
   ++requestNumber;
 
-  showMessage('Escribe una palabra para ver su traducción.');
+  showMessage(
+    'Escribe una palabra para ver su traducción.'
+  );
+
   $('q').focus();
 });
 
+// ========================================
+// TOTAL DE TRADUCCIONES DISPONIBLES
+// ========================================
+
 fetch(API_URL)
   .then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.ok) {
+      throw new Error('HTTP ' + r.status);
+    }
+
     return r.json();
   })
   .then(data => {
-    if (typeof data.total === 'number') {
-      $('count').textContent = data.total;
+    if (
+      typeof data.total === 'number' &&
+      $('count')
+    ) {
+      $('count').textContent =
+        new Intl.NumberFormat('es-MX')
+          .format(data.total);
     }
   })
-  .catch(() => {});
+  .catch(error => {
+    console.warn(
+      'No se pudo obtener el total de traducciones:',
+      error
+    );
+  });
+
+// ========================================
+// RESPALDO LOCAL
+// ========================================
 
 fetch('palabras.json')
   .then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.ok) {
+      throw new Error('HTTP ' + r.status);
+    }
+
     return r.json();
   })
   .then(data => {
     localWords = validWords(data);
     localReady = true;
 
-    if (!$('count').textContent.trim()) {
-      $('count').textContent = localWords.length;
+    const count = $('count');
+
+    if (
+      count &&
+      (!count.textContent.trim() ||
+       count.textContent.trim() === '—')
+    ) {
+      count.textContent =
+        new Intl.NumberFormat('es-MX')
+          .format(localWords.length);
     }
   })
   .catch(() => {});
 
-showMessage('Escribe una palabra para ver su traducción.');
+showMessage(
+  'Escribe una palabra para ver su traducción.'
+);
 
-// PROTECCION TURNSTILE PARA PROPUESTAS
+// ========================================
+// PROTECCIÓN TURNSTILE PARA PROPUESTAS
+// ========================================
 
 let turnstileWidgetId = null;
 let turnstileReady = false;
 
 function setFormMessage(message) {
-  $('formStatus').textContent = message;
+  const status = $('formStatus');
+
+  if (status) {
+    status.textContent = message;
+  }
 }
 
 function loadTurnstile() {
   const form = $('proposalForm');
+
   if (!form) return;
 
   const container = document.createElement('div');
+
   container.id = 'turnstile-propuestas';
   container.style.margin = '16px 0';
 
-  const submit = form.querySelector('[type="submit"]');
+  const submit =
+    form.querySelector('[type="submit"]');
 
   if (submit) {
-    submit.parentNode.insertBefore(container, submit);
+    submit.parentNode.insertBefore(
+      container,
+      submit
+    );
   } else {
     form.appendChild(container);
   }
@@ -303,28 +447,29 @@ function loadTurnstile() {
       return;
     }
 
-    turnstileWidgetId = window.turnstile.render(container, {
-      sitekey: TURNSTILE_SITE_KEY,
-      theme: 'auto',
+    turnstileWidgetId =
+      window.turnstile.render(container, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'auto',
 
-      callback: () => {
-        setFormMessage(
-          'Verificación lista. Ya puedes enviar tu propuesta.'
-        );
-      },
+        callback: () => {
+          setFormMessage(
+            'Verificación lista. Ya puedes enviar tu propuesta.'
+          );
+        },
 
-      'expired-callback': () => {
-        setFormMessage(
-          'La verificación venció. Complétala de nuevo.'
-        );
-      },
+        'expired-callback': () => {
+          setFormMessage(
+            'La verificación venció. Complétala de nuevo.'
+          );
+        },
 
-      'error-callback': () => {
-        setFormMessage(
-          'Error al verificar. Vuelve a intentarlo.'
-        );
-      }
-    });
+        'error-callback': () => {
+          setFormMessage(
+            'Error al verificar. Vuelve a intentarlo.'
+          );
+        }
+      });
 
     turnstileReady = true;
   };
@@ -340,105 +485,129 @@ function loadTurnstile() {
 
 loadTurnstile();
 
-// ENVIO DE PROPUESTAS A CLOUDFLARE D1
+// ========================================
+// ENVÍO DE PROPUESTAS A CLOUDFLARE D1
+// ========================================
 
-$('proposalForm').addEventListener('submit', async event => {
-  event.preventDefault();
+$('proposalForm')?.addEventListener(
+  'submit',
+  async event => {
+    event.preventDefault();
 
-  const form = $('proposalForm');
-  const button = form.querySelector('[type="submit"]');
+    const form = $('proposalForm');
 
-  const proposal = {
-    espanol: $('es').value.trim(),
-    totonaco: $('to').value.trim(),
-    comunidad: $('community').value.trim()
-  };
+    const button =
+      form.querySelector('[type="submit"]');
 
-  if (!proposal.espanol || !proposal.totonaco) {
-    setFormMessage(
-      'Escribe la palabra en español y su traducción.'
-    );
-    return;
-  }
+    const proposal = {
+      espanol: $('es').value.trim(),
+      totonaco: $('to').value.trim(),
+      comunidad: $('community').value.trim()
+    };
 
-  if (
-    !turnstileReady ||
-    turnstileWidgetId === null ||
-    !window.turnstile
-  ) {
-    setFormMessage(
-      'Espera a que cargue la verificación de seguridad.'
-    );
-    return;
-  }
-
-  const token = window.turnstile.getResponse(
-    turnstileWidgetId
-  );
-
-  if (!token) {
-    setFormMessage(
-      'Completa primero la verificación de seguridad.'
-    );
-    return;
-  }
-
-  if (button) button.disabled = true;
-
-  setFormMessage('Enviando propuesta…');
-
-  try {
-    const response = await fetch(PROPOSAL_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        ...proposal,
-        turnstileToken: token
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || 'No se pudo enviar la propuesta.'
+    if (
+      !proposal.espanol ||
+      !proposal.totonaco
+    ) {
+      setFormMessage(
+        'Escribe la palabra en español y su traducción.'
       );
+      return;
     }
 
-    setFormMessage(
-      data.mensaje || 'Propuesta recibida para revisión.'
-    );
-
-    if (!data.duplicada) {
-      form.reset();
+    if (
+      !turnstileReady ||
+      turnstileWidgetId === null ||
+      !window.turnstile
+    ) {
+      setFormMessage(
+        'Espera a que cargue la verificación de seguridad.'
+      );
+      return;
     }
 
-  } catch (error) {
-    setFormMessage(
-      error.message || 'No se pudo enviar. Inténtalo más tarde.'
+    const token = window.turnstile.getResponse(
+      turnstileWidgetId
     );
 
-    console.warn(
-      'Error al enviar propuesta:',
-      error
-    );
-
-  } finally {
-    window.turnstile?.reset(turnstileWidgetId);
+    if (!token) {
+      setFormMessage(
+        'Completa primero la verificación de seguridad.'
+      );
+      return;
+    }
 
     if (button) {
-      button.disabled = false;
+      button.disabled = true;
+    }
+
+    setFormMessage('Enviando propuesta…');
+
+    try {
+      const response = await fetch(
+        PROPOSAL_ENDPOINT,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...proposal,
+            turnstileToken: token
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          'No se pudo enviar la propuesta.'
+        );
+      }
+
+      setFormMessage(
+        data.mensaje ||
+        'Propuesta recibida para revisión.'
+      );
+
+      if (!data.duplicada) {
+        form.reset();
+      }
+
+    } catch (error) {
+      setFormMessage(
+        error.message ||
+        'No se pudo enviar. Inténtalo más tarde.'
+      );
+
+      console.warn(
+        'Error al enviar propuesta:',
+        error
+      );
+
+    } finally {
+      window.turnstile?.reset(
+        turnstileWidgetId
+      );
+
+      if (button) {
+        button.disabled = false;
+      }
     }
   }
-});
+);
 
+// ========================================
 // SERVICIO LOCAL
+// ========================================
 
 if (
   'serviceWorker' in navigator &&
-  ['localhost', '127.0.0.1'].includes(location.hostname)
+  ['localhost', '127.0.0.1'].includes(
+    location.hostname
+  )
 ) {
   navigator.serviceWorker.getRegistrations()
     .then(regs =>
@@ -446,20 +615,30 @@ if (
     );
 }
 
+// ========================================
 // CAMBIO ENTRE BUSCADOR Y FORMULARIO
+// ========================================
 
-const pantallaTraductor = document.querySelector('.hero');
+const pantallaTraductor =
+  document.querySelector('.hero');
 
 const pantallaFormulario =
   document.getElementById('proponer');
 
 const botonProponer =
-  document.querySelector('a[href="#proponer"]');
+  document.querySelector(
+    'a[href="#proponer"]'
+  );
 
 const botonVolver =
-  document.querySelector('#proponer .back');
+  document.querySelector(
+    '#proponer .back'
+  );
 
-if (pantallaTraductor && pantallaFormulario) {
+if (
+  pantallaTraductor &&
+  pantallaFormulario
+) {
   function cambiarPantalla(mostrarFormulario) {
     pantallaTraductor.style.setProperty(
       'display',
@@ -473,46 +652,64 @@ if (pantallaTraductor && pantallaFormulario) {
       'important'
     );
 
-    pantallaFormulario.hidden = !mostrarFormulario;
+    pantallaFormulario.hidden =
+      !mostrarFormulario;
 
     window.scrollTo(0, 0);
   }
 
   cambiarPantalla(false);
 
-  botonProponer?.addEventListener('click', e => {
-    e.preventDefault();
-    cambiarPantalla(true);
-  });
+  botonProponer?.addEventListener(
+    'click',
+    e => {
+      e.preventDefault();
+      cambiarPantalla(true);
+    }
+  );
 
-  botonVolver?.addEventListener('click', e => {
-    e.preventDefault();
-    cambiarPantalla(false);
-  });
+  botonVolver?.addEventListener(
+    'click',
+    e => {
+      e.preventDefault();
+      cambiarPantalla(false);
+    }
+  );
 }
 
 // ========================================
-// CONTADOR PUBLICO DE VISITAS
+// CONTADOR PÚBLICO DE VISITAS
 // ========================================
 
 function obtenerIdentificadorVisitante() {
-  const clave = 'diccionario-visitante-id-v1';
+  const clave =
+    'diccionario-visitante-id-v1';
+
   const patron =
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
   try {
-    let identificador = localStorage.getItem(clave);
+    let identificador =
+      localStorage.getItem(clave);
 
-    if (!identificador || !patron.test(identificador)) {
+    if (
+      !identificador ||
+      !patron.test(identificador)
+    ) {
       identificador = crypto.randomUUID();
-      localStorage.setItem(clave, identificador);
+
+      localStorage.setItem(
+        clave,
+        identificador
+      );
     }
 
     return identificador;
+
   } catch (error) {
-    // En navegadores con almacenamiento restringido,
-    // usamos un identificador temporal de esta sesión.
-    if (!window.__diccionarioVisitanteTemporal) {
+    if (
+      !window.__diccionarioVisitanteTemporal
+    ) {
       window.__diccionarioVisitanteTemporal =
         crypto.randomUUID();
     }
@@ -521,173 +718,196 @@ function obtenerIdentificadorVisitante() {
   }
 }
 
-function crearContadorVisible() {
-  if (document.getElementById('contador-visitas')) {
-    return;
-  }
-
-  const seccion = document.createElement('section');
-  seccion.id = 'contador-visitas';
-
-  Object.assign(seccion.style, {
-    boxSizing: 'border-box',
-    width: '100%',
-    maxWidth: '700px',
-    margin: '30px auto',
-    padding: '20px 16px',
-    background: '#f3f7f5',
-    color: '#174a38',
-    border: '1px solid #d7e7df',
-    borderRadius: '14px',
-    textAlign: 'center',
-    fontFamily: 'inherit',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-  });
-
-  const titulo = document.createElement('h2');
-  titulo.textContent = 'Visitas al diccionario';
-
-  Object.assign(titulo.style, {
-    fontSize: '19px',
-    margin: '0 0 16px',
-    color: '#174a38'
-  });
-
-  const cifras = document.createElement('div');
-
-  Object.assign(cifras.style, {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '28px'
-  });
-
-  function crearDato(etiqueta, identificador) {
-    const bloque = document.createElement('div');
-
-    const numero = document.createElement('strong');
-    numero.id = identificador;
-    numero.textContent = '—';
-
-    Object.assign(numero.style, {
-      display: 'block',
-      fontSize: '32px',
-      lineHeight: '1.2',
-      color: '#146c4a'
-    });
-
-    const texto = document.createElement('span');
-    texto.textContent = etiqueta;
-
-    Object.assign(texto.style, {
-      display: 'block',
-      marginTop: '6px',
-      fontSize: '14px',
-      color: '#3f554b'
-    });
-
-    bloque.append(numero, texto);
-    return bloque;
-  }
-
-  cifras.append(
-    crearDato('Visitas totales', 'contador-total-visitas'),
-    crearDato('Visitantes únicos estimados', 'contador-unicos')
-  );
-
-  const nota = document.createElement('small');
-  nota.textContent =
-    'Estadísticas registradas desde la activación del contador.';
-
-  Object.assign(nota.style, {
-    display: 'block',
-    marginTop: '15px',
-    color: '#64786c',
-    fontSize: '12px'
-  });
-
-  seccion.append(titulo, cifras, nota);
-
-  const pie = document.querySelector('footer');
-
-  if (pie && pie.parentNode) {
-    pie.parentNode.insertBefore(seccion, pie);
-  } else {
-    document.body.appendChild(seccion);
-  }
-}
+// ========================================
+// MOSTRAR ESTADÍSTICAS
+// ========================================
 
 function mostrarCifrasContador(datos) {
   if (
     !datos ||
     typeof datos.visitas !== 'number' ||
-    typeof datos.visitantes !== 'number'
+    typeof datos.visitantes !== 'number' ||
+    !Number.isFinite(datos.visitas) ||
+    !Number.isFinite(datos.visitantes)
   ) {
-    return;
+    console.warn(
+      'El contador recibió datos incompletos:',
+      datos
+    );
+
+    return false;
   }
 
-  const formato = new Intl.NumberFormat('es-MX');
+  const formato =
+    new Intl.NumberFormat('es-MX');
 
-  const visitas = $('contador-total-visitas');
-  const visitantes = $('contador-unicos');
+  const visitas =
+    formato.format(datos.visitas);
 
-  if (visitas) {
-    visitas.textContent = formato.format(datos.visitas);
+  const visitantes =
+    formato.format(datos.visitantes);
+
+  // TARJETAS DEL NUEVO DISEÑO
+
+  const tarjetaVisitas =
+    $('stats-visits');
+
+  const tarjetaVisitantes =
+    $('stats-unique');
+
+  if (tarjetaVisitas) {
+    tarjetaVisitas.textContent = visitas;
   }
 
-  if (visitantes) {
-    visitantes.textContent = formato.format(datos.visitantes);
+  if (tarjetaVisitantes) {
+    tarjetaVisitantes.textContent =
+      visitantes;
   }
+
+  // COMPATIBILIDAD CON DISEÑO ANTERIOR
+
+  const contadorAnteriorVisitas =
+    $('contador-total-visitas');
+
+  const contadorAnteriorVisitantes =
+    $('contador-unicos');
+
+  if (contadorAnteriorVisitas) {
+    contadorAnteriorVisitas.textContent =
+      visitas;
+  }
+
+  if (contadorAnteriorVisitantes) {
+    contadorAnteriorVisitantes.textContent =
+      visitantes;
+  }
+
+  return true;
 }
 
-async function iniciarContadorPublico() {
-  crearContadorVisible();
+// ========================================
+// CONSULTAR ESTADÍSTICAS SIN REGISTRAR
+// UNA VISITA ADICIONAL
+// ========================================
 
+async function consultarEstadisticasPublicas() {
   try {
-    const identificador = obtenerIdentificadorVisitante();
-
-    const respuesta = await fetch(COUNTER_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'X-Visitor-Id': identificador
-      },
-      cache: 'no-store'
-    });
+    const respuesta = await fetch(
+      COUNTER_ENDPOINT,
+      {
+        method: 'GET',
+        cache: 'no-store'
+      }
+    );
 
     if (!respuesta.ok) {
-      throw new Error('HTTP ' + respuesta.status);
+      throw new Error(
+        'HTTP ' + respuesta.status
+      );
     }
 
     const datos = await respuesta.json();
 
-    mostrarCifrasContador(datos);
+    if (!mostrarCifrasContador(datos)) {
+      throw new Error(
+        'La respuesta GET no contiene estadísticas válidas.'
+      );
+    }
+
+    return true;
+
+  } catch (error) {
+    console.warn(
+      'No se pudieron consultar las estadísticas:',
+      error
+    );
+
+    return false;
+  }
+}
+
+// ========================================
+// REGISTRAR UNA VISITA Y ACTUALIZAR
+// LAS ESTADÍSTICAS DEL NUEVO DISEÑO
+// ========================================
+
+async function iniciarContadorPublico() {
+  try {
+    const identificador =
+      obtenerIdentificadorVisitante();
+
+    // CONSERVAMOS EL REGISTRO ORIGINAL:
+    // POST CON X-Visitor-Id.
+
+    const respuesta = await fetch(
+      COUNTER_ENDPOINT,
+      {
+        method: 'POST',
+        headers: {
+          'X-Visitor-Id': identificador
+        },
+        cache: 'no-store'
+      }
+    );
+
+    if (!respuesta.ok) {
+      throw new Error(
+        'HTTP ' + respuesta.status
+      );
+    }
+
+    // SI POST DEVUELVE ESTADÍSTICAS
+    // VÁLIDAS, LAS MOSTRAMOS TAMBIÉN.
+    // SI NO LAS DEVUELVE, NO INTERRUMPIMOS
+    // LA CONSULTA GET POSTERIOR.
+
+    try {
+      const datos = await respuesta.json();
+
+      if (
+        datos &&
+        typeof datos.visitas === 'number' &&
+        typeof datos.visitantes === 'number'
+      ) {
+        mostrarCifrasContador(datos);
+      }
+
+    } catch (errorDatos) {
+      console.info(
+        'Registro realizado; consultaremos las estadísticas por GET.'
+      );
+    }
 
   } catch (error) {
     console.warn(
       'No se pudo registrar la visita:',
       error
     );
-
-    // Si falla el registro, intentamos mostrar
-    // los datos existentes sin modificar el contador.
-    try {
-      const respuesta = await fetch(COUNTER_ENDPOINT, {
-        method: 'GET',
-        cache: 'no-store'
-      });
-
-      if (respuesta.ok) {
-        const datos = await respuesta.json();
-        mostrarCifrasContador(datos);
-      }
-    } catch (errorConsulta) {
-      console.warn(
-        'Contador no disponible:',
-        errorConsulta
-      );
-    }
   }
+
+  // ESTA CONSULTA SE REALIZA SIEMPRE,
+  // TANTO SI POST FUNCIONÓ COMO SI FALLÓ.
+  // GET SOLO CONSULTA LOS VALORES EXISTENTES.
+
+  await consultarEstadisticasPublicas();
 }
 
+// INICIAR EL CONTADOR UNA SOLA VEZ
+
 iniciarContadorPublico();
+
+/*
+==============================================
+FIN DE APP.JS
+
+ESTADÍSTICAS:
+stats-visits = visitas totales
+stats-unique = visitantes únicos estimados
+
+POST: registra la visita.
+GET: consulta las cifras.
+
+NO SE MODIFICA EL WORKER.
+NO SE MODIFICA LA BASE DE TRADUCCIONES.
+==============================================
+*/

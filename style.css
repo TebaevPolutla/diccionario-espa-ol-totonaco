@@ -1,113 +1,1197 @@
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#131a28;background:#fff}.hero{min-height:100svh;background:#29353c url('TEBAPOLUTLA.JPG') center/cover no-repeat}.shade{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(8,17,25,.6),rgba(8,17,25,.67));padding:48px 20px 54px;text-align:center;color:white}.brand{font-size:.72rem;letter-spacing:.18em;font-weight:750;margin-bottom:22px}.brand span{opacity:.8}h1{font-size:clamp(2.1rem,5.5vw,4.4rem);line-height:1.15;letter-spacing:-.04em;margin:0 0 23px;font-weight:800}h1 em{font-style:normal;font-size:.72em;font-weight:650}.intro{max-width:690px;font-size:clamp(1rem,2.3vw,1.35rem);line-height:1.6;margin:0 0 30px}.search{width:min(100%,610px);display:flex;align-items:center;background:white;color:#182232;border-radius:40px;padding:7px 15px;box-shadow:0 12px 36px #0003}.search svg{width:24px;height:24px;fill:none;stroke:#727c89;stroke-width:2;margin-left:9px;flex-shrink:0}.search input{flex:1;min-width:0;border:none;outline:none;padding:16px 12px;font:inherit;font-size:1.05rem;color:#172333}.search button{border:0;background:#e9edf1;color:#53606b;border-radius:50%;width:30px;height:30px;font-size:1.35rem;cursor:pointer}.results{width:min(100%,610px);background:white;color:#1c2636;border-radius:20px;margin-top:22px;padding:16px;min-height:115px;max-height:300px;overflow-y:auto;text-align:left;box-shadow:0 12px 26px #0002}.hint{color:#697484;text-align:center;padding:18px 4px;margin:0}.entry{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 8px;border-bottom:1px solid #e9edf2}.entry:last-child{border:0}.entry strong{display:block;font-size:1.04rem}.entry .translation{font-size:1.1rem;font-weight:650;text-align:right}.entry small{color:#6c7885}.help{margin:27px 0 12px}.add{background:white;color:#121923;text-decoration:none;padding:13px 23px;font-weight:700;border-radius:11px}.proposal{max-width:720px;margin:0 auto;padding:72px 24px 94px}.back{color:#27303d;text-decoration:none}.proposal h2{font-size:clamp(2rem,5vw,3.15rem);line-height:1.15;letter-spacing:-.03em;margin:65px 0 19px}.proposal>p{font-size:1.1rem;color:#586373;line-height:1.55;margin-bottom:43px}form{display:flex;flex-direction:column;gap:12px}label{font-weight:650;margin-top:12px}form input{width:100%;border:1px solid #cbd2db;border-radius:10px;padding:17px;font:inherit;font-size:1rem}form button{border:0;border-radius:10px;background:#090b10;color:white;padding:19px;font:inherit;font-weight:700;cursor:pointer;margin-top:20px}form small{color:#687382;line-height:1.6}#formStatus{color:#24583a;font-weight:600}footer{text-align:center;color:#687382;padding:20px;font-size:.8rem;border-top:1px solid #eef0f3}@media(max-width:500px){.shade{padding:46px 19px}.brand span{display:block;margin-top:6px}h1{font-size:2.15rem}.entry{align-items:flex-start;flex-direction:column}.entry .translation{text-align:left}}
 
-/* Corrección: el fondo y los elementos ya no cambian de posición al buscar. */
-.hero { height: 100svh; min-height: 650px; background-size: cover; background-position: center center; }
-.shade { height: 100%; min-height: 0; justify-content: flex-start; padding-top: clamp(70px, 10svh, 125px); padding-bottom: 35px; }
-.results { height: 205px; min-height: 205px; max-height: 205px; overflow-y: auto; overscroll-behavior: contain; }
-@media (max-width: 500px) {
-  .hero { min-height: 660px; }
-  .shade { padding-top: 72px; padding-bottom: 32px; }
-  .results { height: 180px; min-height: 180px; max-height: 180px; }
+/*
+==============================================
+TRADUCTOR TOTONACO–ESPAÑOL
+TELEBACHILLERATO POLUTLA
+REDISEÑO VISUAL UNIFICADO
+==============================================
+*/
+
+:root {
+  --naranja: #ed7018;
+  --naranja-dark: #ca520a;
+  --crema: #fff7ed;
+  --crema-light: #fffdfa;
+  --melon: #ffdfc5;
+  --cafe: #45261d;
+  --azul: #244660;
+  --gris: #65717b;
+  --borde: #efdcca;
+  --sombra: 0 5px 18px rgba(80, 43, 18, .10);
 }
 
-/* v3: fotografía inmóvil aunque cambie la altura del navegador o el teclado */
-html { overflow-anchor: none; }
-.hero {
-  position: relative;
-  isolation: isolate;
-  height: auto !important;
-  min-height: var(--alto-inicial, 760px) !important;
-  background: #29353c !important;
-}
-.hero::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background-image: url('TEBAPOLUTLA.JPG');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  pointer-events: none;
-}
-.shade {
+*, *::before, *::after {
   box-sizing: border-box;
-  height: auto !important;
-  min-height: var(--alto-inicial, 760px) !important;
-}
-.results { flex: 0 0 205px; }
-@media (max-width: 500px) {
-  .results { flex-basis: 180px; }
 }
 
-/* Ocultar completamente el formulario cuando esté cerrado */
-#proponer[hidden] {
+html {
+  scroll-behavior: smooth;
+  overflow-anchor: none;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--crema);
+  color: var(--cafe);
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Arial, sans-serif;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img, svg {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+[hidden] {
   display: none !important;
 }
 
-/* Botón Buscar */
-.search #buscar {
-  width: auto;
-  min-width: 85px;
-  height: 42px;
-  padding: 0 16px;
-  border-radius: 22px;
-  background: #182b3a;
-  color: white;
-  font-size: 14px;
-  font-weight: 700;
+:focus-visible {
+  outline: 3px solid #1684bd;
+  outline-offset: 3px;
+}
+
+/* FOTOGRAFÍA ORIGINAL */
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--crema);
+}
+
+.hero-photo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 460px;
+  z-index: 0;
+
+  background: #bcd0df url("TEBAPOLUTLA.JPG")
+    center 45% / cover no-repeat;
+
+  pointer-events: none;
+}
+
+.photo-spacer {
+  position: relative;
+  z-index: 0;
+  height: 255px;
+}
+
+/* ENCABEZADO */
+
+.site-header {
+  position: absolute;
+  z-index: 5;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: min(calc(100% - 28px), 1120px);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.school-lockup {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+
+  padding: 10px 15px;
+  border-radius: 17px;
+
+  background: rgba(255, 251, 245, .94);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .10);
+}
+
+.tebaev-logo {
+  display: block;
+  width: 135px;
+  height: 100px;
+  max-width: none;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
-/* Botón para borrar */
-.search #clear {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 22px;
+.header-divider {
+  width: 1px;
+  height: 75px;
+  background: #c9b7aa;
   flex-shrink: 0;
-  margin-left: 8px;
 }
 
-/* Evita que los botones se encimen */
-.search input {
+.school-name {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
 }
 
-/* Corregir la distribución del buscador */
+.school-name strong {
+  font-size: clamp(16px, 2.3vw, 23px);
+  font-weight: 850;
+  line-height: 1.13;
+  color: var(--cafe);
+}
+
+.school-name span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  color: #b75b1c;
+}
+
+/* MENÚ */
+
+.menu {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.menu summary {
+  width: 53px;
+  height: 53px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  border: 1px solid var(--borde);
+  border-radius: 13px;
+  background: #fffbf5;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu summary span {
+  display: block;
+  width: 25px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--cafe);
+}
+
+.menu nav {
+  position: absolute;
+  top: 63px;
+  right: 0;
+  width: 245px;
+  max-width: 80vw;
+  padding: 8px;
+
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 12px 25px #0002;
+}
+
+.menu nav a {
+  display: block;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.menu nav a:hover {
+  background: var(--crema);
+}
+
+/* CUADRO CENTRAL */
+
+.cream-panel {
+  position: relative;
+  z-index: 2;
+  width: min(94%, 850px);
+  margin: 0 auto;
+
+  border-radius: 45px 45px 0 0;
+  background: var(--crema);
+
+  padding: 27px 25px 29px;
+  box-shadow: 0 -5px 26px rgba(62, 39, 20, .08);
+  text-align: center;
+}
+
+/* PENACHO */
+
+.ornament {
+  position: relative;
+  width: 100%;
+  height: 146px;
+  margin: 0 auto 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  pointer-events: none;
+}
+
+.penacho {
+  display: block;
+  width: 176px;
+  max-width: 45vw;
+  height: 145px;
+  object-fit: contain;
+}
+
+/* TÍTULO */
+
+.heading {
+  max-width: 740px;
+  margin: 0 auto;
+}
+
+.heading h1 {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.1;
+}
+
+.heading h1 span {
+  color: var(--naranja);
+  font-size: clamp(39px, 6vw, 59px);
+  font-weight: 800;
+}
+
+.heading h1 strong {
+  margin-top: 5px;
+  color: var(--cafe);
+  font-size: clamp(27px, 4.5vw, 46px);
+  font-weight: 800;
+}
+
+.small-rule {
+  width: 170px;
+  height: 1px;
+  margin: 12px auto 9px;
+  background: #cf9a70;
+}
+
+.project-caption {
+  margin: 0;
+  color: #bd5716;
+  font-size: 10px;
+  letter-spacing: .28em;
+  font-weight: 800;
+}
+
+.intro {
+  max-width: 560px;
+  margin: 15px auto 18px;
+  font-size: clamp(14px, 2vw, 18px);
+  line-height: 1.5;
+}
+
+/* BUSCADOR */
+
 .search {
-  display: flex !important;
+  display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  min-height: 65px;
+  margin-bottom: 16px;
+  padding: 7px 9px 7px 16px;
+
+  border: 1px solid var(--borde);
+  border-radius: 38px;
+  background: white;
+  box-shadow: var(--sombra);
+  scroll-margin-top: 30px;
+}
+
+.search > svg {
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: var(--cafe);
+  stroke-width: 2;
 }
 
 .search input#q {
   flex: 1;
   width: 0;
   min-width: 0;
-  position: static !important;
-  transform: none !important;
+  padding: 12px 3px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+  color: var(--cafe);
+}
+
+.search input::placeholder {
+  color: #929398;
 }
 
 .search #buscar {
-  position: static !important;
   flex-shrink: 0;
-  width: auto;
-  padding: 10px 16px;
-  border-radius: 25px;
-  cursor: pointer;
+  min-width: 95px;
+  min-height: 47px;
+  padding: 10px 18px;
+
+  border: 0;
+  border-radius: 26px;
+  background: var(--naranja);
+  color: white;
+  font-size: 15px;
+  font-weight: 750;
 }
 
 .search #clear {
-  position: static !important;
-  transform: none !important;
   flex-shrink: 0;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 50%;
+  background: #f4eae2;
+  color: #756251;
+  font-size: 21px;
 }
 
-/* Ocultar botones nativos adicionales del navegador */
 .search input::-webkit-search-cancel-button {
   display: none;
 }
 
+/* TRES TARJETAS */
 
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-width: 0;
+  min-height: 116px;
+  padding: 14px 7px;
+
+  border: 1px solid var(--borde);
+  border-radius: 15px;
+  background: var(--crema-light);
+  box-shadow: var(--sombra);
+
+  text-decoration: none;
+  text-align: center;
+  color: var(--azul);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.28;
+}
+
+.action:hover {
+  background: #fff0e1;
+}
+
+.action-svg {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: var(--naranja);
+}
+
+/*
+==============================================
+RESULTADOS DE BÚSQUEDA
+TEXTO MÁS GRANDE Y LEGIBLE
+==============================================
+*/
+
+.results-card {
+  margin-bottom: 16px;
+  padding: 22px 24px;
+
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  background: white;
+  box-shadow: var(--sombra);
+  text-align: left;
+}
+
+.results {
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hint {
+  margin: 0;
+  padding: 10px 0;
+  color: var(--azul);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 20px 7px;
+  border-bottom: 1px solid #eee6df;
+}
+
+.entry > div {
+  min-width: 0;
+}
+
+.entry:last-child {
+  border-bottom: 0;
+}
+
+/* PALABRA CONSULTADA */
+
+.entry strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--cafe);
+  overflow-wrap: anywhere;
+}
+
+/* DIRECCIÓN DE LA TRADUCCIÓN */
+
+.entry small {
+  display: block;
+  margin-top: 7px;
+  color: var(--gris);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* TRADUCCIÓN */
+
+.entry .translation {
+  color: var(--naranja-dark);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* PALABRA DESTACADA */
+
+.word-card {
+  display: flex;
+  align-items: center;
+  min-height: 110px;
+  margin-bottom: 16px;
+  padding: 20px 28px;
+
+  border: 1px solid #f1d9c4;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #ffedda, var(--melon));
+  box-shadow: var(--sombra);
+  text-align: left;
+}
+
+.word-details span {
+  display: block;
+  font-size: 16px;
+}
+
+.word-details strong {
+  display: block;
+  margin: 3px 0;
+  color: var(--naranja);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  line-height: 1.15;
+}
+
+.word-details small {
+  display: block;
+  font-size: 16px;
+}
+
+/* ESTADÍSTICAS */
+
+.stats-block {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  padding: 17px 8px;
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  background: var(--crema-light);
+  box-shadow: var(--sombra);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+
+  padding: 6px;
+  border-right: 1px solid #e9ded5;
+}
+
+.stat:last-child {
+  border-right: 0;
+}
+
+.stat-svg {
+  width: 29px;
+  height: 29px;
+  color: var(--naranja);
+}
+
+.stat strong {
+  color: var(--cafe);
+  font-size: clamp(22px, 3.5vw, 32px);
+  line-height: 1.1;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat > span {
+  color: var(--azul);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+/* FORMULARIO */
+
+.proposal {
+  max-width: 760px;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 35px 21px 72px;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 28px;
+  color: var(--naranja-dark);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.proposal h2 {
+  margin: 18px 0;
+  color: var(--cafe);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 5vw, 44px);
+}
+
+.proposal > p {
+  margin-bottom: 28px;
+  color: #655448;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+#proposalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 25px;
+
+  border: 1px solid var(--borde);
+  border-radius: 17px;
+  background: white;
+  box-shadow: var(--sombra);
+}
+
+#proposalForm label {
+  margin-top: 9px;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+#proposalForm input {
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 15px;
+
+  border: 1px solid #dacfc6;
+  border-radius: 10px;
+  background: white;
+  color: var(--cafe);
+  font-size: 16px;
+}
+
+#proposalForm input:focus {
+  outline: 0;
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 3px #ed701820;
+}
+
+#proposalForm button[type="submit"] {
+  min-height: 54px;
+  margin-top: 12px;
+  padding: 14px;
+
+  border: 0;
+  border-radius: 11px;
+  background: var(--naranja);
+  color: white;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+#proposalForm button[type="submit"]:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+#proposalForm small {
+  color: #68717a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#formStatus {
+  min-height: 20px;
+  color: #286447;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+/* CONTADOR EXISTENTE */
+
+#contador-visitas {
+  display: none !important;
+}
+
+/* VENTANAS INFORMATIVAS */
+
+.info-dialog {
+  position: fixed;
+  width: min(92vw, 470px);
+  max-height: 82dvh;
+  overflow-y: auto;
+
+  padding: 30px 25px 26px;
+  border: 1px solid var(--borde);
+  border-radius: 19px;
+
+  background: var(--crema-light);
+  color: var(--cafe);
+  box-shadow: 0 20px 60px #0004;
+}
+
+.info-dialog::backdrop {
+  background: rgba(17, 15, 12, .6);
+}
+
+.info-dialog h2 {
+  margin: 10px 35px 17px 0;
+  color: var(--naranja-dark);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+}
+
+.info-dialog p {
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 13px;
+
+  width: 37px;
+  height: 37px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+  background: #f3e4d6;
+  color: var(--cafe);
+  font-size: 26px;
+}
+
+.qr-dialog {
+  text-align: center;
+}
+
+.qr-dialog img {
+  display: block;
+  width: 190px;
+  height: 190px;
+  margin: 18px auto;
+  padding: 8px;
+  border-radius: 10px;
+  background: white;
+  object-fit: contain;
+}
+
+.share-link {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 23px;
+  background: var(--naranja);
+  color: white;
+  font-weight: 750;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/*
+==============================================
+PIE DE PÁGINA
+LETRAS BLANCAS MÁS GRANDES
+==============================================
+*/
+
+.site-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  padding: 38px 20px 43px;
+  background: linear-gradient(135deg, #f98a23, #e65d0b);
+  color: #ffffff;
+  text-align: center;
+}
+
+.site-footer strong {
+  display: block;
+  color: #ffffff;
+  font-size: clamp(25px, 3vw, 36px);
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.site-footer > span {
+  display: block;
+  color: #ffffff;
+  font-size: clamp(15px, 1.7vw, 19px);
+  font-weight: 750;
+  letter-spacing: .20em;
+  line-height: 1.4;
+}
+
+.site-footer p {
+  margin: 8px 0 0;
+  color: #ffffff;
+  font-size: clamp(15px, 1.8vw, 21px);
+  font-weight: 850;
+  letter-spacing: .14em;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+/* TABLETAS */
+
+@media (max-width: 850px) {
+  .hero-photo {
+    height: 420px;
+  }
+
+  .photo-spacer {
+    height: 240px;
+  }
+
+  .cream-panel {
+    width: calc(100% - 30px);
+  }
+
+  .tebaev-logo {
+    width: 105px;
+    height: 85px;
+  }
+
+  .school-lockup {
+    gap: 10px;
+  }
+}
+
+/* CELULARES */
+
+@media (max-width: 600px) {
+  .hero-photo {
+    height: 330px;
+    background-position: center 43%;
+  }
+
+  .photo-spacer {
+    height: 195px;
+  }
+
+  .site-header {
+    top: 10px;
+    width: calc(100% - 20px);
+    gap: 7px;
+  }
+
+  .school-lockup {
+    gap: 8px;
+    padding: 7px 9px;
+    border-radius: 12px;
+    max-width: calc(100% - 52px);
+  }
+
+  .tebaev-logo {
+    width: 73px;
+    height: 68px;
+  }
+
+  .header-divider {
+    height: 52px;
+  }
+
+  .school-name {
+    gap: 4px;
+  }
+
+  .school-name strong {
+    font-size: clamp(11px, 3.4vw, 15px);
+  }
+
+  .school-name span {
+    font-size: 7px;
+    letter-spacing: .09em;
+  }
+
+  .menu summary {
+    width: 43px;
+    height: 43px;
+    gap: 5px;
+  }
+
+  .menu summary span {
+    width: 20px;
+    height: 2px;
+  }
+
+  .menu nav {
+    top: 51px;
+  }
+
+  .cream-panel {
+    width: calc(100% - 16px);
+    padding: 17px 13px 23px;
+    border-radius: 34px 34px 0 0;
+  }
+
+  .ornament {
+    height: 113px;
+    margin-bottom: 8px;
+  }
+
+  .penacho {
+    width: 132px;
+    max-width: 43vw;
+    height: 113px;
+  }
+
+  .heading h1 span {
+    font-size: clamp(34px, 9vw, 44px);
+  }
+
+  .heading h1 strong {
+    font-size: clamp(23px, 6.2vw, 31px);
+  }
+
+  .project-caption {
+    font-size: 9px;
+  }
+
+  .intro {
+    margin: 12px auto 16px;
+    font-size: 14px;
+  }
+
+  .search {
+    min-height: 57px;
+    gap: 5px;
+    padding: 6px 7px 6px 11px;
+    margin-bottom: 13px;
+  }
+
+  .search > svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .search input#q {
+    font-size: 16px;
+    padding: 10px 2px;
+  }
+
+  .search #buscar {
+    min-width: 73px;
+    min-height: 42px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .search #clear {
+    width: 23px;
+    height: 23px;
+    font-size: 18px;
+  }
+
+  .quick-actions {
+    gap: 8px;
+    margin-bottom: 13px;
+  }
+
+  .action {
+    min-height: 104px;
+    gap: 7px;
+    padding: 11px 5px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+
+  .action-svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* RESULTADOS GRANDES EN CELULARES */
+
+  .results-card {
+    padding: 17px 14px;
+    margin-bottom: 13px;
+  }
+
+  .entry {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 17px 5px;
+  }
+
+  .entry strong {
+    font-size: 25px;
+  }
+
+  .entry small {
+    font-size: 13px;
+  }
+
+  .entry .translation {
+    font-size: 23px;
+    text-align: left;
+  }
+
+  .word-card {
+    min-height: 100px;
+    padding: 17px 20px;
+    margin-bottom: 13px;
+  }
+
+  .word-details strong {
+    font-size: 32px;
+  }
+
+  .stats-block {
+    padding: 13px 4px;
+  }
+
+  .stat {
+    padding: 4px;
+  }
+
+  .stat-svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .stat strong {
+    font-size: 22px;
+  }
+
+  .stat > span {
+    font-size: 11px;
+  }
+
+  .proposal {
+    padding: 27px 15px 58px;
+  }
+
+  #proposalForm {
+    padding: 19px;
+  }
+
+  /* PIE DE PÁGINA EN CELULARES */
+
+  .site-footer {
+    gap: 11px;
+    padding: 34px 16px 39px;
+  }
+
+  .site-footer strong {
+    font-size: clamp(23px, 6vw, 29px);
+    line-height: 1.3;
+  }
+
+  .site-footer > span {
+    font-size: 14px;
+    letter-spacing: .15em;
+  }
+
+  .site-footer p {
+    font-size: clamp(14px, 3.8vw, 17px);
+    letter-spacing: .07em;
+    line-height: 1.55;
+    margin-top: 7px;
+  }
+}
+
+/* PANTALLAS ESTRECHAS */
+
+@media (max-width: 360px) {
+  .tebaev-logo {
+    width: 62px;
+    height: 61px;
+  }
+
+  .school-name strong {
+    font-size: 11px;
+  }
+
+  .school-name span {
+    font-size: 7px;
+  }
+
+  .heading h1 span {
+    font-size: 32px;
+  }
+
+  .heading h1 strong {
+    font-size: 22px;
+  }
+
+  .action {
+    font-size: 10px;
+  }
+
+  .stat strong {
+    font-size: 20px;
+  }
+
+  .site-footer strong {
+    font-size: 22px;
+  }
+
+  .site-footer > span {
+    font-size: 13px;
+  }
+
+  .site-footer p {
+    font-size: 13px;
+    letter-spacing: .04em;
+  }
+}
+
+/* COMPUTADORAS GRANDES */
+
+@media (min-width: 1200px) {
+  .hero-photo {
+    height: 540px;
+  }
+
+  .photo-spacer {
+    height: 280px;
+  }
+}
+
+/* MOVIMIENTO REDUCIDO */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* FIN DE STYLE.CSS */
+
+/* MEJORA DE LEGIBILIDAD DE LOS TRES BOTONES EN CELULARES */
+
+@media (max-width: 600px) {
+  .quick-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .action {
+    min-height: 115px;
+    padding: 12px 5px;
+    gap: 9px;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+  }
+
+  .action-svg {
+    width: 37px;
+    height: 37px;
+  }
+}
+
+@media (max-width: 360px) {
+  .action {
+    font-size: 11px;
+    padding: 10px 3px;
+  }
+
+  .action-svg {
+    width: 33px;
+    height: 33px;
+  }
+}
