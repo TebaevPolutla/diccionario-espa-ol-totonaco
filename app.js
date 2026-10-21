@@ -1,34 +1,31 @@
 /*
-==============================================
+==================================================
 TRADUCTOR TOTONACO–ESPAÑOL
 TELEBACHILLERATO POLUTLA
 
 APP.JS COMPLETO
 
-VERSIÓN CON SELECTOR DE IDIOMA
+CORRECCIÓN:
+- Prioridad absoluta a coincidencias exactas
+- Sugerencias solo cuando no hay coincidencia exacta
+- Sugerencias identificadas claramente
+- Búsqueda separada por idioma
+- Sin mezclar español y totonaco
 
 CONSERVA:
-- Búsqueda en Cloudflare D1
-- Búsqueda local de respaldo
+- Cloudflare D1
+- Respaldo local
 - Propuestas de palabras
 - Cloudflare Turnstile
-- Identificación de visitantes
 - Registro de visitas
 - Estadísticas públicas
-- Navegación entre pantallas
-
-NUEVO:
-- Español → Totonaco
-- Totonaco → Español
-- Filtrado por idioma seleccionado
-- Resultados con dirección correcta
-- Cancelación lógica de búsquedas anteriores
+- Navegación del sitio
 
 NO MODIFICA:
 - Worker
-- Base D1
+- Base de datos
 - Traducciones almacenadas
-==============================================
+==================================================
 */
 
 // ========================================
@@ -107,14 +104,8 @@ function targetField() {
     : 'espanol';
 }
 
-function matchesDirection(word, query) {
-  return normalize(
-    word[sourceField()]
-  ).includes(query);
-}
-
 // ========================================
-// VALIDACIÓN DE PALABRAS
+// VALIDAR PALABRAS
 // ========================================
 
 function validWords(items) {
@@ -169,25 +160,61 @@ function uniqueWords(items) {
 }
 
 // ========================================
-// FILTRAR POR IDIOMA
+// CLASIFICAR RESULTADOS
 // ========================================
 
-function filterByDirection(items, query) {
+function classifyResults(items, query) {
   const source = sourceField();
 
-  const matches = validWords(items).filter(
-    word =>
-      normalize(word[source]).includes(query)
+  const words = uniqueWords(items);
+
+  // PRIMERO: COINCIDENCIAS EXACTAS
+
+  const exact = words.filter(word =>
+    normalize(word[source]) === query
   );
 
-  const exact = matches.filter(
-    word =>
-      normalize(word[source]) === query
+  if (exact.length > 0) {
+    return {
+      type: 'exact',
+      items: exact.slice(0, 30)
+    };
+  }
+
+  // SEGUNDO: SUGERENCIAS QUE COMIENZAN
+  // CON LA PALABRA BUSCADA
+
+  const startsWith = words.filter(word =>
+    normalize(word[source]).startsWith(query)
   );
 
-  return exact.length
-    ? exact
-    : matches;
+  // TERCERO: OTRAS COINCIDENCIAS PARCIALES
+
+  const contains = words.filter(word => {
+    const value = normalize(word[source]);
+
+    return (
+      value.includes(query) &&
+      !value.startsWith(query)
+    );
+  });
+
+  const suggestions = [
+    ...startsWith,
+    ...contains
+  ].slice(0, 30);
+
+  if (suggestions.length > 0) {
+    return {
+      type: 'suggestions',
+      items: suggestions
+    };
+  }
+
+  return {
+    type: 'none',
+    items: []
+  };
 }
 
 // ========================================
@@ -195,15 +222,12 @@ function filterByDirection(items, query) {
 // ========================================
 
 function matchLocal(query) {
-  const all = uniqueWords([
+  const all = [
     ...localWords,
     ...approvedLocal()
-  ]);
+  ];
 
-  return filterByDirection(
-    all,
-    query
-  ).slice(0, 30);
+  return classifyResults(all, query);
 }
 
 // ========================================
@@ -230,22 +254,40 @@ function showMessage(message) {
 // MOSTRAR RESULTADOS
 // ========================================
 
-function display(items, query) {
+function display(result) {
   const out = $('results');
 
   if (!out) return;
 
   out.replaceChildren();
 
-  const ordered =
-    filterByDirection(items, query);
-
-  if (!ordered.length) {
+  if (
+    !result ||
+    result.type === 'none' ||
+    !result.items.length
+  ) {
     showMessage(
       'No encontramos esa palabra. Puedes proponerla en el formulario.'
     );
 
     return;
+  }
+
+  // AVISO CUANDO NO EXISTE
+  // UNA COINCIDENCIA EXACTA
+
+  if (result.type === 'suggestions') {
+    const notice =
+      document.createElement('p');
+
+    notice.className = 'hint';
+
+    notice.textContent =
+      'No encontramos una coincidencia exacta. Estas son palabras relacionadas:';
+
+    notice.style.marginBottom = '14px';
+
+    out.appendChild(notice);
   }
 
   const source = sourceField();
@@ -256,7 +298,7 @@ function display(items, query) {
       ? 'Español → Totonaco'
       : 'Totonaco → Español';
 
-  for (const word of ordered.slice(0, 30)) {
+  for (const word of result.items) {
     const row =
       document.createElement('div');
 
@@ -277,10 +319,7 @@ function display(items, query) {
     info.textContent =
       directionLabel;
 
-    left.append(
-      title,
-      info
-    );
+    left.append(title, info);
 
     const right =
       document.createElement('div');
@@ -290,10 +329,7 @@ function display(items, query) {
     right.textContent =
       word[target];
 
-    row.append(
-      left,
-      right
-    );
+    row.append(left, right);
 
     out.appendChild(row);
   }
@@ -372,7 +408,7 @@ function setSearchDirection(direction) {
 }
 
 // ========================================
-// BOTONES DE DIRECCIÓN
+// BOTONES DE IDIOMA
 // ========================================
 
 $('direction-es')?.addEventListener(
@@ -388,8 +424,6 @@ $('direction-to')?.addEventListener(
     setSearchDirection('to');
   }
 );
-
-// IDIOMA PREDETERMINADO
 
 setSearchDirection('es');
 
@@ -448,9 +482,6 @@ async function search() {
       );
     }
 
-    // EVITAR RESULTADOS DE BÚSQUEDAS
-    // ANTERIORES O DE OTRO IDIOMA
-
     if (
       current !== requestNumber ||
       directionAtStart !== searchDirection
@@ -458,24 +489,18 @@ async function search() {
       return;
     }
 
-    // RESULTADOS DE D1 MÁS
-    // PALABRAS APROBADAS LOCALMENTE
-
-    const combined = uniqueWords([
+    const combined = [
       ...validWords(data.resultados),
       ...approvedLocal()
-    ]);
+    ];
 
-    const filtered =
-      filterByDirection(
+    const result =
+      classifyResults(
         combined,
         query
       );
 
-    display(
-      filtered,
-      query
-    );
+    display(result);
 
   } catch (error) {
     if (
@@ -487,8 +512,7 @@ async function search() {
 
     if (localReady) {
       display(
-        matchLocal(query),
-        query
+        matchLocal(query)
       );
 
     } else {
@@ -1049,8 +1073,6 @@ function mostrarCifrasContador(datos) {
       datos.visitantes
     );
 
-  // TARJETAS DEL DISEÑO ACTUAL
-
   const tarjetaVisitas =
     $('stats-visits');
 
@@ -1090,7 +1112,6 @@ function mostrarCifrasContador(datos) {
 
 // ========================================
 // CONSULTAR ESTADÍSTICAS
-// SIN REGISTRAR OTRA VISITA
 // ========================================
 
 async function consultarEstadisticasPublicas() {
@@ -1192,30 +1213,28 @@ async function iniciarContadorPublico() {
 }
 
 // ========================================
-// INICIAR CONTADOR UNA SOLA VEZ
+// INICIAR CONTADOR
 // ========================================
 
 iniciarContadorPublico();
 
 /*
-==============================================
+==================================================
 FIN DE APP.JS
 
-SELECTOR:
-Español → Totonaco
-Totonaco → Español
-
 BÚSQUEDA:
-Filtrado según columna seleccionada.
+1. Coincidencia exacta.
+2. Si no existe, sugerencias relacionadas.
+3. Separación por idioma.
 
-CONTADOR:
+ESTADÍSTICAS:
 POST registra visita.
 GET consulta estadísticas.
 
-BASE D1:
+CLOUDFLARE D1:
 Sin modificaciones.
 
 WORKER:
 Sin modificaciones.
-==============================================
+==================================================
 */
