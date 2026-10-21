@@ -1,23 +1,137 @@
-
 <!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#ed7018">
-  <meta name="description" content="Traductor Totonaco–Español del Telebachillerato Polutla, Papantla, Veracruz.">
+  <meta
+    name="description"
+    content="Traductor Totonaco–Español del Telebachillerato Polutla, Papantla, Veracruz."
+  >
+
   <title>Traductor Totonaco–Español | Telebachillerato Polutla</title>
+
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /*
+    ==============================================
+    SELECTOR DE DIRECCIÓN DE TRADUCCIÓN
+    TELEBACHILLERATO POLUTLA
+    ==============================================
+    */
+
+    .language-selector {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+
+      width: 100%;
+      margin: 0 auto 14px;
+      padding: 5px;
+
+      border: 1px solid #efdcca;
+      border-radius: 30px;
+
+      background: #fffdfa;
+
+      box-shadow:
+        0 5px 18px rgba(80, 43, 18, .10);
+    }
+
+    .language-option {
+      min-width: 0;
+      min-height: 48px;
+
+      padding: 11px 8px;
+
+      border: 0;
+      border-radius: 25px;
+
+      background: transparent;
+      color: #45261d;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.3;
+
+      cursor: pointer;
+
+      transition:
+        background .2s,
+        color .2s;
+    }
+
+    .language-option.active {
+      background: #ed7018;
+      color: #ffffff;
+    }
+
+    .language-option:hover:not(.active) {
+      background: #fff0e1;
+    }
+
+    .language-option:focus-visible {
+      outline: 3px solid #1684bd;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 600px) {
+      .language-selector {
+        gap: 4px;
+        padding: 4px;
+        margin-bottom: 12px;
+      }
+
+      .language-option {
+        min-height: 46px;
+        padding: 9px 5px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .language-option {
+        font-size: 11px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .language-option {
+        transition: none;
+      }
+    }
+  </style>
 </head>
 
 <body>
+
 <main>
 
+  <!-- ==========================================
+       PANTALLA PRINCIPAL
+       ========================================== -->
+
   <section class="hero" id="inicio">
-    <div class="hero-photo" aria-hidden="true"></div>
+
+    <div
+      class="hero-photo"
+      aria-hidden="true"
+    ></div>
+
+    <!-- ENCABEZADO -->
 
     <header class="site-header">
+
       <div class="school-lockup">
+
         <img
           src="assets/logo-tebaev.png"
           class="tebaev-logo"
@@ -27,53 +141,147 @@
         <div class="header-divider"></div>
 
         <div class="school-name">
-          <strong>TELEBACHILLERATO<br>POLUTLA</strong>
+          <strong>
+            TELEBACHILLERATO<br>
+            POLUTLA
+          </strong>
+
           <span>PROYECTO ESCOLAR</span>
         </div>
+
       </div>
 
+      <!-- MENÚ -->
+
       <details class="menu" id="siteMenu">
+
         <summary aria-label="Abrir menú">
-          <span></span><span></span><span></span>
+          <span></span>
+          <span></span>
+          <span></span>
         </summary>
+
         <nav aria-label="Menú principal">
-          <a href="#buscador-seccion">Buscar traducciones</a>
-          <a href="#acerca" data-panel="acerca">Acerca del proyecto</a>
-          <a href="#compartir" data-panel="compartir">Compartir mediante QR</a>
+
+          <a href="#buscador-seccion">
+            Buscar traducciones
+          </a>
+
+          <a
+            href="#acerca"
+            data-panel="acerca"
+          >
+            Acerca del proyecto
+          </a>
+
+          <a
+            href="#compartir"
+            data-panel="compartir"
+          >
+            Compartir mediante QR
+          </a>
+
         </nav>
+
       </details>
+
     </header>
 
-    <div class="photo-spacer" aria-hidden="true"></div>
+    <div
+      class="photo-spacer"
+      aria-hidden="true"
+    ></div>
+
+    <!-- PANEL CENTRAL -->
 
     <div class="cream-panel">
 
-      <div class="ornament" aria-hidden="true">
+      <!-- PENACHO -->
+
+      <div
+        class="ornament"
+        aria-hidden="true"
+      >
+
         <img
           src="assets/penacho-papantla.png"
           class="penacho"
           alt=""
         >
+
       </div>
 
+      <!-- TÍTULO -->
+
       <div class="heading">
+
         <h1>
           <span>Traductor</span>
           <strong>Totonaco–Español</strong>
         </h1>
 
         <div class="small-rule"></div>
-        <p class="project-caption">PROYECTO ESCOLAR</p>
+
+        <p class="project-caption">
+          PROYECTO ESCOLAR
+        </p>
 
         <p class="intro">
-          Busca palabras en español o totonaco
+          Selecciona el idioma, escribe una palabra
           y descubre su traducción.
         </p>
+
       </div>
 
-      <div class="search" id="buscador-seccion">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="10.5" cy="10.5" r="7"></circle>
+      <!-- ======================================
+           NUEVO SELECTOR DE IDIOMAS
+           ====================================== -->
+
+      <div
+        class="language-selector"
+        role="group"
+        aria-label="Dirección de traducción"
+      >
+
+        <button
+          id="direction-es"
+          class="language-option active"
+          type="button"
+          aria-pressed="true"
+        >
+          Español → Totonaco
+        </button>
+
+        <button
+          id="direction-to"
+          class="language-option"
+          type="button"
+          aria-pressed="false"
+        >
+          Totonaco → Español
+        </button>
+
+      </div>
+
+      <!-- ======================================
+           BUSCADOR
+           ====================================== -->
+
+      <div
+        class="search"
+        id="buscador-seccion"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="10.5"
+            cy="10.5"
+            r="7"
+          ></circle>
+
           <path d="m16 16 6 6"></path>
         </svg>
 
@@ -83,21 +291,55 @@
           maxlength="100"
           autocomplete="off"
           spellcheck="false"
-          placeholder="Escribe una palabra..."
-          aria-label="Buscar en español o totonaco"
+          placeholder="Escribe una palabra en español..."
+          aria-label="Buscar una palabra en español"
         >
 
-        <button id="clear" type="button" aria-label="Borrar búsqueda">×</button>
-        <button id="buscar" type="button">Buscar</button>
+        <button
+          id="clear"
+          type="button"
+          aria-label="Borrar búsqueda"
+        >
+          ×
+        </button>
+
+        <button
+          id="buscar"
+          type="button"
+        >
+          Buscar
+        </button>
+
       </div>
 
-      <!-- TRES TARJETAS, SIN REPETIR EL BUSCADOR -->
-      <nav class="quick-actions" aria-label="Opciones del proyecto">
+      <!-- ======================================
+           TRES TARJETAS
+           ====================================== -->
 
-        <!-- APP.JS NECESITA ESTE ENLACE -->
-        <a class="action" href="#proponer">
-          <svg class="action-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <circle cx="24" cy="24" r="21" fill="currentColor"/>
+      <nav
+        class="quick-actions"
+        aria-label="Opciones del proyecto"
+      >
+
+        <!-- PROPONER PALABRA -->
+
+        <a
+          class="action"
+          href="#proponer"
+        >
+
+          <svg
+            class="action-svg"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+            <circle
+              cx="24"
+              cy="24"
+              r="21"
+              fill="currentColor"
+            />
+
             <path
               d="M24 13V35M13 24H35"
               stroke="#fff"
@@ -105,94 +347,335 @@
               stroke-linecap="round"
             />
           </svg>
-          <span>Proponer<br>una palabra</span>
+
+          <span>
+            Proponer<br>
+            una palabra
+          </span>
+
         </a>
 
-        <a class="action" href="#acerca" data-panel="acerca">
-          <svg class="action-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <circle cx="24" cy="13" r="7" fill="currentColor"/>
-            <circle cx="9" cy="19" r="5.5" fill="currentColor"/>
-            <circle cx="39" cy="19" r="5.5" fill="currentColor"/>
-            <path d="M11 41V36C11 29 16 25 24 25S37 29 37 36V41Z" fill="currentColor"/>
-            <path d="M3 40V33C3 29 5 26 11 26M45 40V33C45 29 43 26 37 26"
-              stroke="currentColor" stroke-width="4" fill="none"/>
+        <!-- ACERCA DEL PROYECTO -->
+
+        <a
+          class="action"
+          href="#acerca"
+          data-panel="acerca"
+        >
+
+          <svg
+            class="action-svg"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+
+            <circle
+              cx="24"
+              cy="13"
+              r="7"
+              fill="currentColor"
+            />
+
+            <circle
+              cx="9"
+              cy="19"
+              r="5.5"
+              fill="currentColor"
+            />
+
+            <circle
+              cx="39"
+              cy="19"
+              r="5.5"
+              fill="currentColor"
+            />
+
+            <path
+              d="M11 41V36C11 29 16 25 24 25S37 29 37 36V41Z"
+              fill="currentColor"
+            />
+
+            <path
+              d="M3 40V33C3 29 5 26 11 26M45 40V33C45 29 43 26 37 26"
+              stroke="currentColor"
+              stroke-width="4"
+              fill="none"
+            />
+
           </svg>
-          <span>Acerca del<br>proyecto</span>
+
+          <span>
+            Acerca del<br>
+            proyecto
+          </span>
+
         </a>
 
-        <a class="action" href="#compartir" data-panel="compartir">
-          <svg class="action-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <g fill="none" stroke="currentColor" stroke-width="4">
-              <path d="M5 18V5H18M30 5H43V18M5 30V43H18M30 43H43V30"/>
-              <rect x="12" y="12" width="9" height="9"/>
-              <rect x="27" y="12" width="9" height="9"/>
-              <rect x="12" y="27" width="9" height="9"/>
-              <path d="M27 27H35V35H43M29 43V37"/>
+        <!-- CÓDIGO QR -->
+
+        <a
+          class="action"
+          href="#compartir"
+          data-panel="compartir"
+        >
+
+          <svg
+            class="action-svg"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+
+            <g
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4"
+            >
+
+              <path
+                d="M5 18V5H18M30 5H43V18M5 30V43H18M30 43H43V30"
+              />
+
+              <rect
+                x="12"
+                y="12"
+                width="9"
+                height="9"
+              />
+
+              <rect
+                x="27"
+                y="12"
+                width="9"
+                height="9"
+              />
+
+              <rect
+                x="12"
+                y="27"
+                width="9"
+                height="9"
+              />
+
+              <path
+                d="M27 27H35V35H43M29 43V37"
+              />
+
             </g>
+
           </svg>
-          <span>Código QR<br>para compartir</span>
+
+          <span>
+            Código QR<br>
+            para compartir
+          </span>
+
         </a>
 
       </nav>
 
-      <!-- APP.JS CONTROLA LOS RESULTADOS -->
-      <section class="results-card" id="resultsCard" hidden aria-label="Resultados">
-        <div id="results" class="results" aria-live="polite">
-          <p class="hint">Escribe una palabra para ver su traducción.</p>
+      <!-- ======================================
+           RESULTADOS
+           ====================================== -->
+
+      <section
+        class="results-card"
+        id="resultsCard"
+        hidden
+        aria-label="Resultados"
+      >
+
+        <div
+          id="results"
+          class="results"
+          aria-live="polite"
+        >
+
+          <p class="hint">
+            Escribe una palabra para ver su traducción.
+          </p>
+
         </div>
+
       </section>
 
-      <section class="word-card" aria-label="Palabra destacada">
+      <!-- ======================================
+           PALABRA DESTACADA
+           ====================================== -->
+
+      <section
+        class="word-card"
+        aria-label="Palabra destacada"
+      >
+
         <div class="word-details">
+
           <span>Palabra destacada</span>
+
           <strong>Paxni</strong>
+
           <small>Puerco</small>
+
         </div>
+
       </section>
 
-      <section class="stats-block" aria-label="Estadísticas del diccionario">
+      <!-- ======================================
+           ESTADÍSTICAS
+           ====================================== -->
+
+      <section
+        class="stats-block"
+        aria-label="Estadísticas del diccionario"
+      >
+
+        <!-- TRADUCCIONES -->
 
         <div class="stat">
-          <svg class="stat-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <path d="M24 12C18 8 9 7 4 10V37C11 34 19 35 24 40V12Z"
-              fill="currentColor"/>
-            <path d="M24 12C30 8 39 7 44 10V37C37 34 29 35 24 40V12Z"
-              fill="currentColor"/>
+
+          <svg
+            class="stat-svg"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+
+            <path
+              d="M24 12C18 8 9 7 4 10V37C11 34 19 35 24 40V12Z"
+              fill="currentColor"
+            />
+
+            <path
+              d="M24 12C30 8 39 7 44 10V37C37 34 29 35 24 40V12Z"
+              fill="currentColor"
+            />
+
           </svg>
+
           <strong id="count">—</strong>
-          <span>Traducciones<br>disponibles</span>
+
+          <span>
+            Traducciones<br>
+            disponibles
+          </span>
+
         </div>
 
+        <!-- VISITAS -->
+
         <div class="stat">
-          <svg class="stat-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <rect x="6" y="28" width="9" height="13" rx="2" fill="currentColor"/>
-            <rect x="20" y="18" width="9" height="23" rx="2" fill="currentColor"/>
-            <rect x="34" y="7" width="9" height="34" rx="2" fill="currentColor"/>
+
+          <svg
+            class="stat-svg"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+
+            <rect
+              x="6"
+              y="28"
+              width="9"
+              height="13"
+              rx="2"
+              fill="currentColor"
+            />
+
+            <rect
+              x="20"
+              y="18"
+              width="9"
+              height="23"
+              rx="2"
+              fill="currentColor"
+            />
+
+            <rect
+              x="34"
+              y="7"
+              width="9"
+              height="34"
+              rx="2"
+              fill="currentColor"
+            />
+
           </svg>
+
           <strong id="stats-visits">—</strong>
-          <span>Visitas<br>totales</span>
+
+          <span>
+            Visitas<br>
+            totales
+          </span>
+
         </div>
 
+        <!-- VISITANTES -->
+
         <div class="stat">
-          <svg class="stat-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <circle cx="24" cy="13" r="7" fill="currentColor"/>
-            <circle cx="9" cy="20" r="5" fill="currentColor"/>
-            <circle cx="39" cy="20" r="5" fill="currentColor"/>
-            <path d="M9 41V35C9 28 15 25 24 25S39 28 39 35V41Z"
-              fill="currentColor"/>
+
+          <svg
+            class="stat-svg"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+
+            <circle
+              cx="24"
+              cy="13"
+              r="7"
+              fill="currentColor"
+            />
+
+            <circle
+              cx="9"
+              cy="20"
+              r="5"
+              fill="currentColor"
+            />
+
+            <circle
+              cx="39"
+              cy="20"
+              r="5"
+              fill="currentColor"
+            />
+
+            <path
+              d="M9 41V35C9 28 15 25 24 25S39 28 39 35V41Z"
+              fill="currentColor"
+            />
+
           </svg>
+
           <strong id="stats-unique">—</strong>
-          <span>Visitantes únicos<br>estimados</span>
+
+          <span>
+            Visitantes únicos<br>
+            estimados
+          </span>
+
         </div>
 
       </section>
 
     </div>
+
   </section>
 
-  <!-- FORMULARIO ORIGINAL -->
-  <section class="proposal" id="proponer" hidden>
-    <a href="#inicio" class="back">← Volver al traductor</a>
+  <!-- ==========================================
+       FORMULARIO DE PROPUESTAS
+       ========================================== -->
+
+  <section
+    class="proposal"
+    id="proponer"
+    hidden
+  >
+
+    <a
+      href="#inicio"
+      class="back"
+    >
+      ← Volver al traductor
+    </a>
 
     <h2>Proponer una palabra</h2>
 
@@ -202,7 +685,11 @@
     </p>
 
     <form id="proposalForm">
-      <label for="es">Español</label>
+
+      <label for="es">
+        Español
+      </label>
+
       <input
         id="es"
         name="espanol"
@@ -212,7 +699,10 @@
         placeholder="Ej. Casa"
       >
 
-      <label for="to">Totonaco</label>
+      <label for="to">
+        Totonaco
+      </label>
+
       <input
         id="to"
         name="totonaco"
@@ -222,7 +712,10 @@
         placeholder="Escribe la traducción"
       >
 
-      <label for="community">Comunidad o variante (opcional)</label>
+      <label for="community">
+        Comunidad o variante (opcional)
+      </label>
+
       <input
         id="community"
         name="comunidad"
@@ -232,7 +725,10 @@
       >
 
       <!-- Turnstile se incorpora mediante app.js -->
-      <button type="submit">Enviar propuesta</button>
+
+      <button type="submit">
+        Enviar propuesta
+      </button>
 
       <small>
         Tu propuesta se enviará para revisión.
@@ -241,18 +737,39 @@
         esperando al menos 60 segundos entre envíos.
       </small>
 
-      <p id="formStatus" role="status" aria-live="polite"></p>
+      <p
+        id="formStatus"
+        role="status"
+        aria-live="polite"
+      ></p>
+
     </form>
+
   </section>
 
 </main>
 
-<!-- INFORMACIÓN SOLO CUANDO SE SOLICITA -->
-<dialog id="acerca" class="info-dialog">
-  <button type="button" class="dialog-close"
-    data-close aria-label="Cerrar">×</button>
+<!-- ==========================================
+     ACERCA DEL PROYECTO
+     ========================================== -->
 
-  <h2>Nuestra lengua, nuestra identidad</h2>
+<dialog
+  id="acerca"
+  class="info-dialog"
+>
+
+  <button
+    type="button"
+    class="dialog-close"
+    data-close
+    aria-label="Cerrar"
+  >
+    ×
+  </button>
+
+  <h2>
+    Nuestra lengua, nuestra identidad
+  </h2>
 
   <p>
     El Traductor Totonaco–Español es un proyecto escolar
@@ -264,14 +781,31 @@
     aprendizaje y difusión de la lengua totonaca
     mediante una herramienta digital gratuita.
   </p>
+
 </dialog>
 
-<!-- QR SOLO CUANDO SE SOLICITA -->
-<dialog id="compartir" class="info-dialog qr-dialog">
-  <button type="button" class="dialog-close"
-    data-close aria-label="Cerrar">×</button>
+<!-- ==========================================
+     COMPARTIR MEDIANTE QR
+     ========================================== -->
 
-  <h2>Comparte nuestro traductor</h2>
+<dialog
+  id="compartir"
+  class="info-dialog qr-dialog"
+>
+
+  <button
+    type="button"
+    class="dialog-close"
+    data-close
+    aria-label="Cerrar"
+  >
+    ×
+  </button>
+
+  <h2>
+    Comparte nuestro traductor
+  </h2>
+
   <p>
     Escanea este código con otro dispositivo
     para visitar la página oficial.
@@ -289,23 +823,48 @@
     href="https://www.tebaevpolutladiccionario.org/"
     target="_blank"
     rel="noopener noreferrer"
-  >Abrir página oficial</a>
+  >
+    Abrir página oficial
+  </a>
+
 </dialog>
 
+<!-- ==========================================
+     PIE DE PÁGINA
+     ========================================== -->
+
 <footer class="site-footer">
-  <strong>Telebachillerato Polutla</strong>
-  <span>PROYECTO ESCOLAR</span>
-  <p>NUESTRA LENGUA, NUESTRA IDENTIDAD</p>
+
+  <strong>
+    Telebachillerato Polutla
+  </strong>
+
+  <span>
+    PROYECTO ESCOLAR
+  </span>
+
+  <p>
+    NUESTRA LENGUA, NUESTRA IDENTIDAD
+  </p>
+
 </footer>
+
+<!-- LÓGICA DEL TRADUCTOR -->
 
 <script src="app.js" defer></script>
 
-<!-- SOLO PRESENTACIÓN: NO MODIFICA LA API -->
+<!-- ==========================================
+     FUNCIONES VISUALES DEL SITIO
+     ========================================== -->
+
 <script>
 (function () {
   "use strict";
 
-  // Ventanas informativas.
+  // ========================================
+  // VENTANAS INFORMATIVAS
+  // ========================================
+
   const dialogs = {
     acerca: document.getElementById("acerca"),
     compartir: document.getElementById("compartir")
@@ -314,6 +873,7 @@
   document.querySelectorAll("[data-panel]").forEach(link => {
     link.addEventListener("click", event => {
       event.preventDefault();
+
       const dialog = dialogs[link.dataset.panel];
 
       if (dialog && !dialog.open) {
@@ -321,7 +881,10 @@
       }
 
       const menu = document.getElementById("siteMenu");
-      if (menu) menu.open = false;
+
+      if (menu) {
+        menu.open = false;
+      }
     });
   });
 
@@ -335,13 +898,21 @@
     if (!dialog) return;
 
     dialog.addEventListener("click", event => {
-      if (event.target === dialog) dialog.close();
+      if (event.target === dialog) {
+        dialog.close();
+      }
     });
   });
 
-  // Resultados: ocultos mientras no haya una búsqueda.
-  const resultCard = document.getElementById("resultsCard");
-  const resultArea = document.getElementById("results");
+  // ========================================
+  // MOSTRAR Y OCULTAR RESULTADOS
+  // ========================================
+
+  const resultCard =
+    document.getElementById("resultsCard");
+
+  const resultArea =
+    document.getElementById("results");
 
   const initialMessages = new Set([
     "Escribe una palabra para ver su traducción.",
@@ -351,23 +922,29 @@
   function syncResults() {
     if (!resultCard || !resultArea) return;
 
-    const message = resultArea.textContent.trim();
+    const message =
+      resultArea.textContent.trim();
+
     resultCard.hidden =
       !message || initialMessages.has(message);
   }
 
   if (resultArea) {
-    new MutationObserver(syncResults).observe(resultArea, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
+    new MutationObserver(syncResults).observe(
+      resultArea,
+      {
+        childList: true,
+        subtree: true,
+        characterData: true
+      }
+    );
+
     syncResults();
   }
 
-  // Sincronización de estadísticas existentes.
-  // No genera consultas ni registros adicionales.
-  const counter = document.getElementById("contador-visitas");
+  // ========================================
+  // SINCRONIZACIÓN DE CONTADORES ANTERIORES
+  // ========================================
 
   function syncCounters() {
     const pairs = [
@@ -376,21 +953,32 @@
     ];
 
     for (const [source, target] of pairs) {
-      const a = document.getElementById(source);
-      const b = document.getElementById(target);
-      if (a && b) b.textContent = a.textContent;
+      const original =
+        document.getElementById(source);
+
+      const destination =
+        document.getElementById(target);
+
+      if (original && destination) {
+        destination.textContent =
+          original.textContent;
+      }
     }
   }
 
   let counterObserver = null;
 
   function watchCounter() {
-    const original = document.getElementById("contador-visitas");
+    const original =
+      document.getElementById("contador-visitas");
+
     if (!original || counterObserver) return;
 
     syncCounters();
 
-    counterObserver = new MutationObserver(syncCounters);
+    counterObserver =
+      new MutationObserver(syncCounters);
+
     counterObserver.observe(original, {
       childList: true,
       subtree: true,
@@ -398,12 +986,15 @@
     });
   }
 
-  const bodyObserver = new MutationObserver(watchCounter);
+  const bodyObserver =
+    new MutationObserver(watchCounter);
+
   bodyObserver.observe(document.body, {
     childList: true
   });
 
   watchCounter();
+
 })();
 </script>
 
